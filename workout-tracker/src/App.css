@@ -1,0 +1,268 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  line-height: 1.6;
+}
+
+.hero-section h1,
+.hero-section p {
+  color: black;
+  background-color: rgba(255, 255, 255, 0.7);
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.hero-section p {
+  margin-top: 20px; /* Adjust this value for more or less spacing */
+}
+
+.hero-section {
+  height: 70vh;
+  background: url("background3.webp") no-repeat center center/cover;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  text-align: center;
+}
+
+.text-block h2 {
+  margin-bottom: 20px; /* Adjust this value for desired spacing */
+}
+
+.text-block p {
+  margin-bottom: 15px; /* Adjust for spacing between paragraphs */
+}
+
+.about-heading {
+  font-weight: bold; /* Makes the heading bold */
+  font-size: 1.5rem;
+  text-align: left; /* Adjust the font size as needed */
+}
+
+.about-paragraph {
+  text-align: left; /* Aligns paragraphs to the left */
+  margin: 0; /* Optional: Removes default margin for a cleaner look */
+}
+
+.content-section {
+  display: flex;
+  justify-content: space-around;
+  padding: 40px;
+  margin-top: 30px;
+}
+
+.text-block,
+.video-block {
+  width: 45%;
+  padding: 20px;
+  background-color: #f4f4f4;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.video-block video {
+  width: 100%;
+  border-radius: 8px;
+}
+
+.container {
+  display: flex; /* Use flexbox for layout */
+  gap: 7rem; /* Adjust this for the desired spacing between blocks */
+  justify-content: center; /* Center the content if needed */
+}
+
+.text-block,
+.video-block {
+  width: 50%; /* Adjust the width to allow them to fit side by side */
+}
+
+/* Optional styling for the video */
+.video-block video {
+  width: 100%; /* Makes the video responsive */
+  height: auto; /* Maintain aspect ratio */
+}
+
+.footer-section {
+  text-align: center;
+  padding: 20px;
+  background-color: #333;
+  color: white;
+}
+
+.content-section {
+  padding: 2rem; /* Increase padding around the section */
+  justify-content: center; /* Centers the section horizontally */
+  align-items: center; /* Centers content vertically */
+  width: 100%; /* Full width of the parent */
+}
+
+.home-screen {
+  width: 50%; /* Occupies 50% of the screen width */
+  padding: 2rem; /* Adjust padding as needed */
+  font-size: 1.2rem; /* Increases base font size */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Optional shadow for depth */
+}
+
+.subtitle {
+  font-size: 2rem; /* Increase font size of the subtitle */
+  margin-bottom: 1.5rem; /* More space below the subtitle */
+}
+
+.btn {
+  padding: 0.75rem 1.5rem; /* Larger button padding */
+  font-size: 1rem; /* Adjust button text size if needed */
+}
+
+.video-container img {
+  max-width: 100%; /* Responsive image scaling */
+  height: auto; /* Maintain aspect ratio */
+}
+
+.feedback-section,
+.workout-summary {
+  padding: 1rem; /* Adjust padding for feedback and summary sections */
+  font-size: 1.1rem; /* Increase font size for readability */
+}
+
+.footer-section {
+  padding: 20px; /* Increase the padding for more space */
+  background-color: #0b0b0b; /* Optional: change background color */
+  text-align: center; /* Center the text */
+  border-top: 1px solid #0c0101; /* Optional: add a top border */
+  height: 30vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center; /* Centers content horizontally */
+  padding: 20px;
+  margin: 0; /* Remove any default margin */
+}
+
+.footer-title {
+  font-size: 2rem; /* Adjust title size */
+  font-weight: bold; /* Make title bold */
+  margin-bottom: 10px; /* Remove default margin */
+}
+
+.footer-description {
+  font-size: 1.2rem;
+  max-width: 600px;
+  margin: 0; /* Space between title and description */
+}
+
+.content-section {
+  display: flex;
+  justify-content: center; /* Center the content */
+  padding: 20px; /* Add padding around the section */
+  background-color: #f9f9f9;
+  background-color: #f0f4f8; /* Light background color */
+}
+
+.home-screen {
+  max-width: 600px; /* Limit the width for better readability */
+  background: #dcdcdc; /* White background for the home screen */
+  border-radius: 10px; /* Rounded corners */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  padding: 20px; /* Padding inside the home screen */
+  /* Subtle shadow for depth */
+}
+
+.subtitle {
+  font-size: 28px; /* Subtitle size */
+  font-weight: bold; /* Bold for emphasis */
+  color: #333; /* Dark text color */
+  text-align: center; /* Center the title */
+  margin-bottom: 20px; /* Space below the title */
+}
+
+.form-select {
+  padding: 10px; /* Padding inside the select */
+  border: 1px solid #ccc; /* Border for the select */
+  border-radius: 5px; /* Rounded corners */
+  width: 100%; /* Full width */
+}
+
+.options {
+  justify-content: space-around; /* Distribute radio options */
+}
+
+.btn {
+  padding: 10px 20px; /* Padding for buttons */
+  margin: 5px; /* Space between buttons */
+  border-radius: 5px; /* Rounded corners for buttons */
+}
+
+.btn-black {
+  background-color: black; /* Black background */
+  color: white; /* White text */
+  border: none; /* Remove border */
+  border-radius: 5px; /* Rounded corners */
+  padding: 10px 20px; /* Padding for buttons */
+  cursor: pointer; /* Pointer cursor on hover */
+  transition: background-color 0.3s ease; /* Smooth transition */
+}
+
+.btn-black:hover {
+  background-color: #444; /* Darker shade on hover for feedback */
+}
+
+.video-container {
+  margin-top: 20px; /* Space above video */
+  text-align: center; /* Center the video frame */
+}
+
+.feedback-section {
+  background-color: #e7f3fe; /* Light blue background for feedback */
+  border: 1px solid #b8daff; /* Border for feedback box */
+}
+
+.workout-summary {
+  background-color: #f8f9fa; /* Light gray for summary */
+  border: 1px solid #ccc; /* Border for summary box */
+  margin-top: 20px; /* Space above summary */
+  border-radius: 8px; /* Rounded corners */
+}
+
+.summary-item {
+  margin-bottom: 10px; /* Space between summary items */
+}
+
+.summary-heading {
+  font-weight: bold; /* Bold for headings in summary */
+}
+
+.how-to-use-section {
+  padding: 20px;
+  background-color: #f9f9f9; /* Light background color */
+}
+
+.how-to-use-heading {
+  text-align: left; /* Align heading to the left */
+  margin-bottom: 15px; /* Space below heading */
+  font-size: 1.5rem; /* Adjust font size as needed */
+  font-weight: bold;
+}
+
+.how-to-use-list {
+  list-style-type: none; /* Remove default list styling */
+  padding-left: 0; /* Remove padding */
+}
+
+.how-to-use-point {
+  font-family: "Arial", sans-serif; /* Choose a font family */
+  font-size: 1rem; /* Set font size */
+  color: #333; /* Text color */
+  margin-bottom: 10px; /* Space between points */
+}
+
+.image-block img {
+  max-width: 100%; /* Responsive image */
+  height: auto; /* Maintain aspect ratio */
+}

@@ -1,0 +1,36 @@
+body,
+html {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  color: #333;
+  box-sizing: border-box;
+}
+
+/* Hero Section Customization */
+.hero-section {
+  background-image: url("./bg4.jpeg");
+  margin-top: 4rem; /* Adjust for sticky header spacing */
+}
+
+.hero-section1 {
+  background-image: url("./bg5.webp");
+  margin-top: 4rem; /* Adjust for sticky header spacing */
+  background-size: 50%;
+  background-size: cover; /* Zoom in by increasing the size */
+  background-position: center; /* Centers the image */
+  background-repeat: no-repeat; /* Prevents the image from repeating */
+}
+.hero-section2 {
+  background-image: url("./bg6.jpeg");
+  background-size: cover; /* Ensures the image covers the section */
+  background-position: center center; /* Keeps the image centered */
+  background-repeat: no-repeat; /* Ensures no repeating of the image */
+  margin-top: 4rem; /* Adjust for sticky header spacing */
+  height: 70vh; /* Adjust this value to control the vertical size of the image */
+}
+
+/* Optional: Custom Styling for Buttons */
+button {
+  transition: background-color 0.3s ease;
+}
