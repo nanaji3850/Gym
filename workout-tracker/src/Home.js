@@ -32,7 +32,7 @@ const Home = () => {
             <a href="#features" className="text-lg hover:text-orange-500">
               Features
             </a>
-            <a href="#blog" className="text-lg hover:text-orange-500">
+            <a href="/blog" className="text-lg hover:text-orange-500">
               Blog
             </a>
             <a href="#faqs" className="text-lg hover:text-orange-500">
@@ -104,7 +104,7 @@ const Home = () => {
             <img
               src="https://10web-site.ai/125/wp-content/uploads/sites/137/2024/11/tenweb_media_cApR2UsM.webp"
               alt="Effortless Workout Logging"
-              className="w-3/4 object-contain rounded-lg mb-4"
+              className="w-3/4 object-contain rounded-lg mb-4 fadeInImage"
             />
             <h3 className="text-2xl font-semibold">
               Effortless Workout Logging
@@ -121,7 +121,7 @@ const Home = () => {
             <img
               src="https://10web-site.ai/125/wp-content/uploads/sites/137/2024/11/tenweb_media_9G5pk73k.webp"
               alt="Accurate Rep Counting"
-              className="w-3/4 object-contain rounded-lg mb-4"
+              className="w-3/4 object-contain rounded-lg mb-4 fade-in"
             />
             <h3 className="text-2xl font-semibold">Accurate Rep Counting</h3>
             <p className="text-gray-700 mt-4">
@@ -136,7 +136,7 @@ const Home = () => {
             <img
               src="https://10web-site.ai/125/wp-content/uploads/sites/137/2024/11/tenweb_media_MgjrARDS.webp"
               alt="Calorie Calculation Made Easy"
-              className="w-3/4 object-contain rounded-lg mb-4"
+              className="w-3/4 object-contain rounded-lg mb-4 fade-in"
             />
             <h3 className="text-2xl font-semibold">
               Calorie Calculation Made Easy
@@ -152,7 +152,7 @@ const Home = () => {
             <img
               src="https://media.istockphoto.com/id/154961329/photo/exercise-schedule.jpg?s=612x612&w=0&k=20&c=4cVjbGIa82QmVA_lxA9JW0LZrCao6PaJSmvystWqINk="
               alt="Effortless Workout Logging"
-              className="w-3/4 object-contain rounded-lg mb-4"
+              className="w-3/4 object-contain rounded-lg mb-4 fade-in"
             />
             <h3 className="text-2xl font-semibold">
               personalized workout plan
@@ -168,7 +168,7 @@ const Home = () => {
             <img
               src="https://t4.ftcdn.net/jpg/01/82/40/43/360_F_182404327_IFFLPLSstIccSD1Qy2kccZSWNIswrJ9z.jpg"
               alt="Effortless Workout Logging"
-              className="w-3/4 object-contain rounded-lg mb-4"
+              className="w-3/4 object-contain rounded-lg mb-4 fade-in"
             />
             <h3 className="text-2xl font-semibold">personalized Diet plan</h3>
             <p className="text-gray-700 mt-4">
@@ -189,7 +189,7 @@ const Home = () => {
               <img
                 src="https://10web-site.ai/125/wp-content/uploads/sites/137/2024/11/tenweb_media_Trl6VOLI.webp"
                 alt="Step 1: Open the app"
-                className="w-3/4 object-contain rounded-lg mb-4 cursor-pointer"
+                className="w-3/4 object-contain rounded-lg mb-4 cursor-pointer fade-in"
               />
             </a>
             <div className="md:w-1/2 md:pl-6">

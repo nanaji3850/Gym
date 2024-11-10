@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import io from "socket.io-client";
 import axios from "axios";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 const socket = io("http://localhost:5000", {
   pingInterval: 25000, // Send a ping every 25 seconds
@@ -136,7 +136,10 @@ function WorkoutAnalysis() {
       <header className="bg-white shadow-md py-8 fixed top-0 left-0 w-full z-50">
         <div className="container mx-auto flex justify-between items-center px-4">
           <a href="#home" className="text-3xl font-bold text-orange-500">
-            GymFluencer
+            {/* Use Link component for navigation */}
+            <Link to="/" className="text-3xl font-bold text-orange-500">
+              GymFluencer
+            </Link>
           </a>
 
           {/* <nav className="hidden md:flex space-x-8 text-gray-700">
@@ -344,6 +347,10 @@ function WorkoutAnalysis() {
                 navigate("/weight-loss-diet"); // Navigate to the weight loss diet page
               } else if (diet.name === "personalize Diet Plan") {
                 navigate("/Diet-form"); // Navigate to another specific diet page
+              } else if (
+                diet.name === "Muscle Building (Hypertrophy) Diet Plan"
+              ) {
+                navigate("/muscle_building"); // Navigate to another specific diet page
               } else {
                 // Handle other diet plans as necessary
                 console.log(`Selected diet: ${diet.name}`);
