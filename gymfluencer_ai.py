@@ -513,6 +513,12 @@ def handle_start_workout(data):
         cap.release()
         cv2.destroyAllWindows()
 
+        # Delete uploaded file after processing
+        if source != "0":
+            os.remove(file_path)
+            print(f"Deleted file: {file_path}")
+
+
     
 
         # Generate a summary
