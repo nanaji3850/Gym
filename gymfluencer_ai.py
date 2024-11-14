@@ -537,14 +537,14 @@ async def handle_stop_workout(websocket: WebSocket):
     print(f"calories_burned: {calories_burned}")
 
 
-    # Check if workout_type is set to avoid KeyError
-    if workout_type and workout_type in rep_count and workout_type in calories_burned:
-        summary = {workout_type: {'reps': rep_count[workout_type], 'calories': calories_burned[workout_type]}}
-    else:
-        summary = {"message": "No workout data available"}  # Fallback summary
+    # # Check if workout_type is set to avoid KeyError
+    # if workout_type and workout_type in rep_count and workout_type in calories_burned:
+    #     summary = {workout_type: {'reps': rep_count[workout_type], 'calories': calories_burned[workout_type]}}
+    # else:
+    #     summary = {"message": "No workout data available"}  # Fallback summary
 
-    feedback = generate_workout_feedback(workout_type, reps_data) if workout_type else "No feedback available"
-    await websocket.send_json({'summary': summary, 'feedback': feedback})
+    # feedback = generate_workout_feedback(workout_type, reps_data) if workout_type else "No feedback available"
+    # await websocket.send_json({'summary': summary, 'feedback': feedback})
 
     # Send a confirmation message to the client that the workout has stopped
     
