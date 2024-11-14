@@ -1,0 +1,22 @@
+services:
+  be:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    networks:
+      - ic
+  fe:
+    depends_on:
+      - be
+    build:
+      context: ./workout-tracker
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    networks:
+      - ic
+networks:
+  ic:
+    driver: bridge
