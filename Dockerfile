@@ -1,17 +1,18 @@
-# Use the Python 3.11.0 slim image as the base image
-FROM python:3.11.0-slim
+FROM python:3.11-slim
 
-# Set the working directory inside the container
 WORKDIR /app
 
-# Copy the current directory contents into the container at /app
-COPY . /app
+RUN apt-get update && apt-get install -y \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install dependencies (make sure you have a requirements.txt file in your project directory)
+COPY requirements.txt .
+
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Expose the port your app will run on (adjust if it's different)
 EXPOSE 8000
 
-# Define the command to run your application
-CMD ["python", "gymfluencer_ai.py"]
+COPY gymfluencer_ai.py .
+
+CMD ["uvicorn", "gymfluencer_ai:app", "--host", "0.0.0.0", "--port", "8000"]
