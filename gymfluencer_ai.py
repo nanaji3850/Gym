@@ -1,55 +1,70 @@
 import os
-from flask import Flask, request, jsonify
-import json
-from flask_cors import CORS
-from flask_socketio import SocketIO, emit  # Import SocketIO
+from fastapi import FastAPI, Request, WebSocket,WebSocketDisconnect, UploadFile, File, HTTPException
+from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
+# import json
 import cv2
 import mediapipe as mp
 import math
 import numpy as np
-import openai  # Import OpenAI
-# import base64 
+import openai
 from dotenv import load_dotenv
+# from fastapi_socketio import SocketManager
+from typing import List
+# import socketio
+import asyncio
 
-load_dotenv()  # Load environment variables from .env file
-openai.api_key = os.getenv("OPENAI_API_KEY")  # Set the API key from the environment variable
+load_dotenv()
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
-app = Flask(__name__)
-CORS(app)
-socketio = SocketIO(app, cors_allowed_origins="*", ping_interval=25000, ping_timeout=60000)  # Initialize SocketIO
+app = FastAPI()
+# socket_manager = SocketManager(app)
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 UPLOAD_FOLDER = './uploads'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
+
+
+# Store connected WebSocket clients
+active_connections = []
 # Initialize MediaPipe Pose
 mp_pose = mp.solutions.pose
 pose = mp_pose.Pose()
-# Initialize drawing utility for visualizing pose landmarks
 mp_drawing = mp.solutions.drawing_utils
 
-# Define drawing specifications for thicker and clearer pose landmarks
-landmark_style = mp_drawing.DrawingSpec(color=(0, 0, 255), thickness=4, circle_radius=3)  # Green color, thick, larger circles
-connection_style = mp_drawing.DrawingSpec(color=(0, 255, 255), thickness=3)  # Red color for connections
+landmark_style = mp_drawing.DrawingSpec(color=(0, 0, 255), thickness=4, circle_radius=3)
+connection_style = mp_drawing.DrawingSpec(color=(0, 255, 255), thickness=3)
 
 rep_count = {
     'Push-ups': 0,
     'Squats': 0,
     'Pull-ups': 0,
     'Deadlifts': 0,
-    'Bicep Curls': 0  # Added bicep curls
+    'Bicep Curls': 0
 }
 stage = None
-top_angle=0
-down_angle=0
-reps_data=""
+top_angle = 0
+down_angle = 0
+reps_data = ""
 workout_type = None
+workout_task = None
 workout_started = False
+stop_workout_flag = False
 calories_burned = {
     'Push-ups': 0,
     'Squats': 0,
     'Pull-ups': 0,
     'Deadlifts': 0,
-    'Bicep Curls': 0  # Added bicep curls
+    'Bicep Curls': 0
 }
 
 CALORIES_PER_REP = {
@@ -57,7 +72,7 @@ CALORIES_PER_REP = {
     'Squats': 0.31,
     'Pull-ups': 0.98,
     'Deadlifts': 1.23,
-    'Bicep Curls': 0.25  # Added calories per rep for bicep curls
+    'Bicep Curls': 0.25
 }
 
 angle_ranges = {
@@ -69,7 +84,6 @@ angle_ranges = {
 }
 
 def generate_workout_plan(fitness_info):
-    # Define the tailored prompt for generating the workout plan
     prompt = f"""
     Create a personalized weekly workout plan based on the following user information:
     
@@ -97,7 +111,6 @@ def generate_workout_plan(fitness_info):
     Make sure the final output is formatted and styled in a clear, instructional way, as if for direct frontend display.
     """
 
-    # Call to OpenAI API
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         temperature=0.6,
@@ -107,13 +120,10 @@ def generate_workout_plan(fitness_info):
         ]
     )
 
-    # Extract the response and return it
     workout_plan = response['choices'][0]['message']['content']
     return workout_plan
 
-
 def generate_diet_plan(diet_info):
-    # Define the tailored prompt for generating the workout plan
     prompt = f"""
     Create a personalized weekly Diet plan based on the following user information:
     
@@ -147,7 +157,6 @@ def generate_diet_plan(diet_info):
     Make sure the final output is formatted and styled in a clear, instructional way, as if for direct frontend display.
     """
 
-    # Call to OpenAI API
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         temperature=0.6,
@@ -157,15 +166,10 @@ def generate_diet_plan(diet_info):
         ]
     )
 
-    # Extract the response and return it
     diet_plan = response['choices'][0]['message']['content']
     return diet_plan
 
-
-
-# Function to generate workout feedback using OpenAI's API
 def generate_workout_feedback(workout_name, reps_data):
-
     if workout_name in angle_ranges:
         down_angle_range = angle_ranges[workout_name]["down_angle"]
         up_angle_range = angle_ranges[workout_name]["up_angle"]
@@ -201,8 +205,6 @@ def generate_workout_feedback(workout_name, reps_data):
     feedback = response.choices[0].message['content'].strip()
     return feedback
 
-
-# Function to calculate the angle between three points
 def calculate_angle(a, b, c):
     a = np.array(a)
     b = np.array(b)
@@ -213,40 +215,43 @@ def calculate_angle(a, b, c):
         angle = 360 - angle
     return angle
 
-
-# Function to count reps based on the workout type and calculating calories burned
-def count_reps(landmarks,workout_type,body_weight):
-    global rep_count, stage, calories_burned, top_angle , reps_data, down_angle
+def count_reps(landmarks, workout_type, body_weight):
+    global rep_count, stage, calories_burned, top_angle, reps_data, down_angle
     
     if workout_type == 'Push-ups':
         left_wrist = landmarks.landmark[mp_pose.PoseLandmark.LEFT_WRIST]
         left_elbow = landmarks.landmark[mp_pose.PoseLandmark.LEFT_ELBOW]
         left_shoulder = landmarks.landmark[mp_pose.PoseLandmark.LEFT_SHOULDER]
-
+        
         wrist = [left_wrist.x, left_wrist.y]
         elbow = [left_elbow.x, left_elbow.y]
         shoulder = [left_shoulder.x, left_shoulder.y]
+        
+        left_angle = calculate_angle(wrist, elbow, shoulder)
 
-        angle = calculate_angle(wrist, elbow, shoulder)
+        right_wrist = landmarks.landmark[mp_pose.PoseLandmark.RIGHT_WRIST]
+        right_elbow = landmarks.landmark[mp_pose.PoseLandmark.RIGHT_ELBOW]
+        right_shoulder = landmarks.landmark[mp_pose.PoseLandmark.RIGHT_SHOULDER]
+        
+        wrist = [right_wrist.x, right_wrist.y]
+        elbow = [right_elbow.x, right_elbow.y]
+        shoulder = [right_shoulder.x, right_shoulder.y]
+        
+        right_angle = calculate_angle(wrist, elbow, shoulder)
 
-        if angle > 150:
-            top_angle = max(top_angle, angle)
+        if left_angle > 150 and right_angle > 150:
+            top_angle = max(top_angle, left_angle, right_angle)
             stage = "up"
             
-        elif angle < 80 and stage == 'up':
+        elif left_angle < 80 and right_angle < 80 and stage == 'up':
             rep_count[workout_type] += 1
             stage = "down"
             calories_burned[workout_type] += CALORIES_PER_REP[workout_type] * (body_weight / 70)
-            print(f"Rep: {rep_count[workout_type]}, Angle (down): {angle},Angle(up):{top_angle}")
+            # print(f"Rep: {rep_count[workout_type]}, Left Angle (down): {left_angle}, Right Angle (down): {right_angle}, Angle(up): {top_angle}")
             
-            # Add the rep data to reps_data string
-            reps_data += f"Rep: {rep_count[workout_type]}, Angle (down): {angle}, Angle (up): {top_angle}\n"
+            reps_data += f"Rep: {rep_count[workout_type]}, Left Angle (down): {left_angle}, Right Angle (down): {right_angle}, Angle (up): {top_angle}\n"
             
             top_angle = 0
-
-            # Generate feedback and emit it to the frontend
-        # feedback = generate_workout_feedback(workout_type, reps_data)  # Generate feedback
-        # emit('feedback', {'feedback': feedback})  # Emit feedback to frontend
 
     elif workout_type == 'Squats':
         left_knee = landmarks.landmark[mp_pose.PoseLandmark.LEFT_KNEE]
@@ -257,19 +262,30 @@ def count_reps(landmarks,workout_type,body_weight):
         hip = [left_hip.x, left_hip.y]
         ankle = [left_ankle.x, left_ankle.y]
 
-        angle = calculate_angle(hip, knee, ankle)
+        left_angle = calculate_angle(hip, knee, ankle)
 
-        if angle < 90:
-            down_angle=min(down_angle,angle)
+        right_knee = landmarks.landmark[mp_pose.PoseLandmark.RIGHT_KNEE]
+        right_hip = landmarks.landmark[mp_pose.PoseLandmark.RIGHT_HIP]
+        right_ankle = landmarks.landmark[mp_pose.PoseLandmark.RIGHT_ANKLE]
+
+        knee = [right_knee.x, right_knee.y]
+        hip = [right_hip.x, right_hip.y]
+        ankle = [right_ankle.x, right_ankle.y]
+
+        right_angle = calculate_angle(hip, knee, ankle)
+
+        if left_angle < 90 and right_angle < 90:
+            down_angle = min(down_angle, left_angle, right_angle)
             stage = "down"
-        elif angle > 160 and stage =='down':
+        elif left_angle > 160 and right_angle > 160 and stage == 'down':
             rep_count[workout_type] += 1
-            stage="up"
+            stage = "up"
             calories_burned[workout_type] += CALORIES_PER_REP[workout_type] * (body_weight / 70)
-            print(f"Rep: {rep_count[workout_type]}, Angle (up): {angle},Angle(down):{down_angle}")
+            print(f"Rep: {rep_count[workout_type]}, Left Angle (up): {left_angle}, Right Angle (up): {right_angle}, Angle(down): {down_angle}")
             
-            reps_data += f"Rep: {rep_count[workout_type]}, Angle (up): {angle}, Angle (down): {down_angle}\n"
-            down_angle=0
+            reps_data += f"Rep: {rep_count[workout_type]}, Left Angle (up): {left_angle}, Right Angle (up): {right_angle}, Angle (down): {down_angle}\n"
+            
+            down_angle = 0
 
     elif workout_type == 'Pull-ups':
         left_wrist = landmarks.landmark[mp_pose.PoseLandmark.LEFT_WRIST]
@@ -280,23 +296,31 @@ def count_reps(landmarks,workout_type,body_weight):
         elbow = [left_elbow.x, left_elbow.y]
         shoulder = [left_shoulder.x, left_shoulder.y]
 
-        angle = calculate_angle(wrist, elbow, shoulder)
+        left_angle = calculate_angle(wrist, elbow, shoulder)
 
-        if angle > 160:
-            down_angle = max(down_angle, angle)
+        right_wrist = landmarks.landmark[mp_pose.PoseLandmark.RIGHT_WRIST]
+        right_elbow = landmarks.landmark[mp_pose.PoseLandmark.RIGHT_ELBOW]
+        right_shoulder = landmarks.landmark[mp_pose.PoseLandmark.RIGHT_SHOULDER]
+
+        wrist = [right_wrist.x, right_wrist.y]
+        elbow = [right_elbow.x, right_elbow.y]
+        shoulder = [right_shoulder.x, right_shoulder.y]
+
+        right_angle = calculate_angle(wrist, elbow, shoulder)
+
+        if left_angle > 160 and right_angle > 160:
+            down_angle = max(down_angle, left_angle, right_angle)
             stage = "down"
-        elif angle < 70 and stage =='down':
+        elif left_angle < 70 and right_angle < 70 and stage == 'down':
             rep_count[workout_type] += 1
-            stage="up"
+            stage = "up"
             calories_burned[workout_type] += CALORIES_PER_REP[workout_type] * (body_weight / 70)
 
-            print(f"Rep: {rep_count[workout_type]}, Angle (down): {down_angle},Angle(up):{angle}")
+            print(f"Rep: {rep_count[workout_type]}, Left Angle (down): {down_angle}, Right Angle (down): {down_angle}, Angle(up): {left_angle}")
             
-            # Add the rep data to reps_data string
-            reps_data += f"Rep: {rep_count[workout_type]}, Angle (down): {down_angle}, Angle (up): {angle}\n"
+            reps_data += f"Rep: {rep_count[workout_type]}, Left Angle (down): {down_angle}, Right Angle (down): {down_angle}, Angle (up): {left_angle}\n"
             
             down_angle = 0
-            
 
     elif workout_type == 'Deadlifts':
         hip = [landmarks.landmark[mp_pose.PoseLandmark.LEFT_HIP.value].x,
@@ -314,131 +338,130 @@ def count_reps(landmarks,workout_type,body_weight):
             rep_count[workout_type] += 1
             stage="up"
             calories_burned[workout_type] += CALORIES_PER_REP[workout_type] * (body_weight / 70)
-           
+
+            print(f"Rep: {rep_count[workout_type]}, Angle (down): {down_angle},Angle(up):{angle}")
+            
+            reps_data += f"Rep: {rep_count[workout_type]}, Angle (down): {down_angle}, Angle (up): {angle}\n"
+            
+            down_angle = 0
 
     elif workout_type == 'Bicep Curls':
         left_wrist = landmarks.landmark[mp_pose.PoseLandmark.LEFT_WRIST]
         left_elbow = landmarks.landmark[mp_pose.PoseLandmark.LEFT_ELBOW]
         left_shoulder = landmarks.landmark[mp_pose.PoseLandmark.LEFT_SHOULDER]
 
-        wrist = [left_wrist.x, left_wrist.y]
-        elbow = [left_elbow.x, left_elbow.y]
-        shoulder = [left_shoulder.x, left_shoulder.y]
+        right_wrist = landmarks.landmark[mp_pose.PoseLandmark.RIGHT_WRIST]
+        right_elbow = landmarks.landmark[mp_pose.PoseLandmark.RIGHT_ELBOW]
+        right_shoulder = landmarks.landmark[mp_pose.PoseLandmark.RIGHT_SHOULDER]
 
-        angle = calculate_angle(shoulder, elbow, wrist)  # Use elbow, shoulder, and wrist for curls
+        left_wrist_coord = [left_wrist.x, left_wrist.y]
+        left_elbow_coord = [left_elbow.x, left_elbow.y]
+        left_shoulder_coord = [left_shoulder.x, left_shoulder.y]
+        left_angle = calculate_angle(left_shoulder_coord, left_elbow_coord, left_wrist_coord)
 
-        if angle > 160:  # Arm fully extended
+        right_wrist_coord = [right_wrist.x, right_wrist.y]
+        right_elbow_coord = [right_elbow.x, right_elbow.y]
+        right_shoulder_coord = [right_shoulder.x, right_shoulder.y]
+        right_angle = calculate_angle(right_shoulder_coord, right_elbow_coord, right_wrist_coord)
+
+        angle = min(left_angle, right_angle)
+
+        if angle > 160:
             down_angle = max(down_angle, angle)
             stage = "down"
-        elif angle < 40 and stage =='down':  # Arm fully flexed
+        elif angle < 40 and stage == 'down':
             rep_count[workout_type] += 1
-            stage="up"
+            stage = "up"
             calories_burned[workout_type] += CALORIES_PER_REP[workout_type] * (body_weight / 70)
 
-            print(f"Rep: {rep_count[workout_type]}, Angle (down): {down_angle},Angle(up):{angle}")
-            
-            # Add the rep data to reps_data string
-            reps_data += f"Rep: {rep_count[workout_type]}, Angle (down): {down_angle}, Angle (up): {angle}\n"
-            
-            down_angle = 0
-            
+            print(f"Rep: {rep_count[workout_type]}, Angle (down): {down_angle}, Angle(up): {angle}")
 
-# Define a new route to handle user fitness information submission
-@app.route('/submit_fitness_info', methods=['POST'])
-def submit_fitness_info():
-    # Extract data from the POST request
-    fitness_info = request.get_json()  # Expecting JSON data from the frontend
+            reps_data += f"Rep: {rep_count[workout_type]}, Angle (down): {down_angle}, Angle (up): {angle}\n"
+
+            down_angle = 0
+
+@app.post("/submit_fitness_info")
+async def submit_fitness_info(request: Request):
+    fitness_info = await request.json()
 
     if not fitness_info:
-        return jsonify({"error": "No data provided"}), 400
+        raise HTTPException(status_code=400, detail="No data provided")
 
-    # Here you can store or process the fitness data
-    # For demonstration, we'll just print the data
-    # print("Received fitness data:", fitness_info)
-    # Generate the workout plan based on fitness_info
     workout_plan = generate_workout_plan(fitness_info)
     print(workout_plan)
-    socketio.emit('workout_plan', {'workout_plan': workout_plan})
+    
+    return JSONResponse(content={"message": "Fitness information submitted successfully!","workout_plan": workout_plan})
 
-    # Optionally, you could save this data to a database or perform some other logic
-
-    # Returning a success response
-    return jsonify({"message": "Fitness information submitted successfully!"}), 200  
-
-@app.route('/submit_diet_info', methods=['POST'])
-def submit_diet_info():
-    # Extract data from the POST request
-    diet_info = request.get_json()  # Expecting JSON data from the frontend
+@app.post("/submit_diet_info")
+async def submit_diet_info(request: Request):
+    diet_info = await request.json()
 
     if not diet_info:
-        return jsonify({"error": "No data provided"}), 400
+        raise HTTPException(status_code=400, detail="No data provided")
 
-    # Here you can store or process the fitness data
-    # For demonstration, we'll just print the data
-    # print("Received fitness data:", fitness_info)
-    # Generate the workout plan based on fitness_info
     diet_plan = generate_diet_plan(diet_info)
     print(diet_plan)
-    socketio.emit('diet_plan', {'diet_plan': diet_plan})
+    
+    return JSONResponse(content={"message": "Diet information submitted successfully!","diet_plan": diet_plan})
 
-    # Optionally, you could save this data to a database or perform some other logic
+@app.post("/upload")
+async def upload_file(file: UploadFile = File(...)):
+    if not file:
+        raise HTTPException(status_code=400, detail="No file part")
 
-    # Returning a success response
-    return jsonify({"message": "Fitness information submitted successfully!"}), 200      
+    file_path = os.path.join(UPLOAD_FOLDER, file.filename)
+    with open(file_path, "wb") as buffer:
+        buffer.write(await file.read())
 
-@socketio.on('stop_workout')
-def handle_stop_workout():
-    global stop_workout_flag
-    stop_workout_flag = True
+    return JSONResponse(content={"filename": file.filename})
 
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    global workout_task,stop_workout_flag
+    await websocket.accept()
+    while True:
+        try:
+            data = await websocket.receive_json()
+            action = data.get("action")
+            print(f"Received action: {action}")
 
-@app.route('/upload', methods=['POST'])
-def upload_file():
-    if 'file' not in request.files:
-        return jsonify({"error": "No file part"}), 400
+            if action == "start_workout":
+                # Launch `handle_start_workout` as a background task
+                stop_workout_flag = False  # Reset the stop flag
+                workout_task = asyncio.create_task(handle_start_workout(websocket, data))
+            elif action == "stop_workout":
+                await handle_stop_workout(websocket)  # Stop the workout immediately
 
-    file = request.files['file']
-    if file.filename == '':
-        return jsonify({"error": "No selected file"}), 400
+        except WebSocketDisconnect:
+            print("Client disconnected")
+            break
+        
 
-    # Save the file to the uploads folder
-    filename = file.filename
-    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-    file.save(file_path)
-
-    # Return the filename for further processing
-    return jsonify({"filename": filename}), 200
-
-@socketio.on('start_workout')
-def handle_start_workout(data):
-    source = data.get('source')
-    workout_type = data.get('workout_type')
-    body_weight = data.get('body_weight')
-    global rep_count, calories_burned, down, workout_started, stop_workout_flag,reps_data
-    # (Reset counters and variables here)
-
-    # Reset counters and state variables for a fresh start
+async def handle_start_workout(websocket: WebSocket, data: dict):
+    global rep_count, calories_burned, workout_started, stop_workout_flag, reps_data
     rep_count = {
         'Push-ups': 0,
         'Squats': 0,
         'Pull-ups': 0,
         'Deadlifts': 0,
-        'Bicep Curls': 0  # Reset bicep curls count
+        'Bicep Curls': 0
     }
     calories_burned = {
         'Push-ups': 0,
         'Squats': 0,
         'Pull-ups': 0,
         'Deadlifts': 0,
-        'Bicep Curls': 0  # Reset bicep curls count
+        'Bicep Curls': 0
     }
-    down = False
-    
     workout_started = False
     stop_workout_flag = False
 
-    
     try:
+        # Extract workout details
+        source = data.get('source')
+        workout_type = data.get('workout_type')
+        body_weight = data.get('body_weight')
+
         if source == "0":
             cap = cv2.VideoCapture(0)
         else:
@@ -448,89 +471,85 @@ def handle_start_workout(data):
 
             if not os.path.exists(file_path):
                 print(f"Error: File {file_path} not found.")
-                emit('error', {'message': 'File not found'})
+                websocket.send_json({'message': 'File not found'})
                 return
-          
+
             cap = cv2.VideoCapture(file_path)
-            
 
         while cap.isOpened() and not stop_workout_flag:
             ret, frame = cap.read()
-            if not ret or stop_workout_flag:
+            if not ret:
                 break
 
-            # (Pose processing code here: calculating landmarks, classifying workout, counting reps)
-            # Convert the frame to RGB
             image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             image.flags.writeable = False
-
-            # Process the image and get pose landmarks
             results = pose.process(image)
-
-            # Convert the image back to BGR for OpenCV
             image.flags.writeable = True
             image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
 
-            # Draw the pose annotations on the image
             if results.pose_landmarks:
-                mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_pose.POSE_CONNECTIONS,landmark_drawing_spec=landmark_style,
-                                          
-                                          
-                                          connection_drawing_spec=connection_style)
+                mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_pose.POSE_CONNECTIONS, landmark_drawing_spec=landmark_style, connection_drawing_spec=connection_style)
+                count_reps(results.pose_landmarks, workout_type, body_weight)
 
-                count_reps(results.pose_landmarks, workout_type,body_weight)
+            cv2.putText(image, f'Workout: {workout_type}', (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
+            cv2.putText(image, f'Reps:{rep_count[workout_type]}', (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
+            cv2.putText(image, f'Calories: {calories_burned[workout_type]:.2f}', (10, 90), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
 
-                # Count repetitions based on workout type
-                if workout_started:
-                    count_reps(results.pose_landmarks, workout_type,body_weight)
-
-            # Display the rep count and workout type on the frame
-            cv2.putText(image, f'Workout: {workout_type}', (10, 30), 
-                        cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
-            cv2.putText(image, f'Reps:{rep_count[workout_type]}', (10, 60), 
-                        cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
-
-            
-            cv2.putText(image, f'Calories: {calories_burned[workout_type]:.2f}', (10, 90), 
-                            cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
-            
-            # Show the processed image
-            cv2.imshow('Workout Counter', image)
-
-
-            
-            # Encode frame and send it to frontend via WebSocket
             _, buffer = cv2.imencode('.jpg', image)
             frame_data = buffer.tobytes()
-            emit('frame', frame_data)  # Send frame data to frontend
+            await websocket.send_bytes(frame_data)
 
-        # Break the loop on 'q' key press
+            # Brief pause to allow control flow back to event loop
+            await asyncio.sleep(0.1)
+
             if cv2.waitKey(10) & 0xFF == ord('q'):
                 break
-
-            
 
         cap.release()
         cv2.destroyAllWindows()
 
-        # Delete uploaded file after processing
         if source != "0":
             os.remove(file_path)
             print(f"Deleted file: {file_path}")
 
-
-    
-
-        # Generate a summary
         summary = {workout_type: {'reps': rep_count[workout_type], 'calories': calories_burned[workout_type]}}
-        
-        emit('summary', summary)  # Emit final summary via WebSocket
-        feedback = generate_workout_feedback(workout_type, reps_data)  # Generate feedback
-        emit('feedback', {'feedback': feedback})  # Emit feedback to frontend
+       
+        await websocket.send_json({'summary': summary})
+
+        feedback = generate_workout_feedback(workout_type, reps_data)
+       
+        await websocket.send_json({'feedback': feedback})
 
     except Exception as e:
         print(f"Error: {e}")
 
-# Run the SocketIO app
-if __name__ == '__main__':
-    socketio.run(app, debug=True)
+async def handle_stop_workout(websocket: WebSocket):
+
+    global stop_workout_flag
+    global rep_count, calories_burned, workout_started, stop_workout_flag, reps_data,workout_task,workout_type
+    stop_workout_flag = True
+    if workout_task:
+        await workout_task  # Wait for the workout task to complete if running
+        workout_task = None
+    await websocket.send_json({"message": "Workout stopped"})
+    print(f"workout_type: {workout_type}")
+    print(f"rep_count: {rep_count}")
+    print(f"calories_burned: {calories_burned}")
+
+
+    # Check if workout_type is set to avoid KeyError
+    if workout_type and workout_type in rep_count and workout_type in calories_burned:
+        summary = {workout_type: {'reps': rep_count[workout_type], 'calories': calories_burned[workout_type]}}
+    else:
+        summary = {"message": "No workout data available"}  # Fallback summary
+
+    feedback = generate_workout_feedback(workout_type, reps_data) if workout_type else "No feedback available"
+    await websocket.send_json({'summary': summary, 'feedback': feedback})
+
+    # Send a confirmation message to the client that the workout has stopped
+    
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)

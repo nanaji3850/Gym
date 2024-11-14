@@ -1,86 +1,77 @@
 import React, { useState, useEffect } from "react";
-import io from "socket.io-client";
-import axios from "axios";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-
-const socket = io("http://localhost:5000", {
-  pingInterval: 25000, // Send a ping every 25 seconds
-  pingTimeout: 60000, // Allow 60 seconds for a pong response before closing
-}); // Connect to Flask-SocketIO
 
 function WorkoutAnalysis() {
   const [file, setFile] = useState(null);
   const [source, setSource] = useState("file");
   const [summary, setSummary] = useState(null);
-  const [frame, setFrame] = useState(null); // State for video frames
-  const [error, setError] = useState(""); // State to show error messages
-  // const [workoutType, setWorkoutType] = useState("");
+  const [frame, setFrame] = useState(null);
+  const [error, setError] = useState("");
   const [bodyWeight, setBodyWeight] = useState("");
-  const [feedback, setFeedback] = useState(""); // New state for real-time feedback
-  // const { id } = useParams(); // Retrieve the workout ID from the URL
+  const [feedback, setFeedback] = useState("");
   const location = useLocation();
-  const workoutType = location.state?.workoutType || ""; // Retrieve workout type from previous page
-  const navigate = useNavigate(); // Initialize useNavigate
-  console.log("Location state:", location.state);
-  useEffect(() => {
-    if (workoutType) {
-      console.log(`Selected workout: ${workoutType}`);
-      // Proceed with workout analysis setup
-    } else {
-      console.log("No workout type selected.");
-    }
-  }, [workoutType]);
+  const workoutType = location.state?.workoutType || "";
+  const navigate = useNavigate();
+  const [socket, setSocket] = useState(null);
 
   useEffect(() => {
-    // Listen for frame data
-    socket.on("frame", (frameData) => {
-      setFrame(
-        `data:image/jpeg;base64,${btoa(
-          new Uint8Array(frameData).reduce(
+    const ws = new WebSocket("ws://localhost:8000/ws");
+    setSocket(ws);
+
+    ws.onmessage = async (event) => {
+      if (event.data instanceof Blob) {
+        // Handle binary data (image frame)
+        const arrayBuffer = await event.data.arrayBuffer();
+        const base64String = btoa(
+          new Uint8Array(arrayBuffer).reduce(
             (data, byte) => data + String.fromCharCode(byte),
             ""
           )
-        )}`
-      );
-    });
-
-    // Listen for summary data
-    socket.on("summary", (data) => {
-      setSummary(data);
-    });
-
-    // Listen for real-time feedback data
-    socket.on("feedback", (data) => {
-      console.log(data);
-      setFeedback(data.feedback); // Update feedback state with the specific property
-    });
+        );
+        setFrame(`data:image/jpeg;base64,${base64String}`);
+      } else {
+        try {
+          // Handle JSON data (summary, feedback, etc.)
+          const data = JSON.parse(event.data);
+          console.log("Data received from WebSocket:", data);
+          if (data.hasOwnProperty("summary")) {
+            setSummary(data.summary);
+          } else if (data.hasOwnProperty("feedback")) {
+            setFeedback(data.feedback);
+          }
+        } catch (error) {
+          console.error("Failed to parse JSON:", error);
+        }
+      }
+    };
 
     return () => {
-      socket.off("frame");
-      socket.off("summary");
-      socket.off("feedback");
+      ws.close();
     };
   }, []);
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     setFile(selectedFile);
-    uploadFile(selectedFile); // Automatically upload the file
+    uploadFile(selectedFile);
   };
 
   const uploadFile = (file) => {
     const formData = new FormData();
     formData.append("file", file);
 
-    return axios
-      .post("http://localhost:5000/upload", formData)
-      .then((response) => {
+    return fetch("http://localhost:8000/upload", {
+      method: "POST",
+      body: formData,
+    })
+      .then((response) => response.json())
+      .then((data) => {
         console.log("File uploaded successfully");
-        return response.data.filename; // Return filename for further use
+        return data.filename;
       })
       .catch((error) => {
         console.error("Error uploading file:", error);
-        return null; // Return null if there's an error
+        return null;
       });
   };
 
@@ -92,55 +83,61 @@ function WorkoutAnalysis() {
     const parsedBodyWeight = parseFloat(bodyWeight);
 
     if (source === "file") {
-      // Ensure a file is selected
       if (!file) {
         setError("Please select a file to upload.");
         return;
       }
 
-      // Attempt to upload the file and get the filename
       const filename = await uploadFile(file);
       if (filename) {
-        // Only emit if the filename is valid
-        socket.emit("start_workout", {
-          source: "file",
-          filename: filename,
-          workout_type: workoutType,
-          body_weight: parsedBodyWeight, // Pass workout type to backend
-        });
+        socket.send(
+          JSON.stringify({
+            action: "start_workout",
+            source: "file",
+            filename: filename,
+            workout_type: workoutType,
+            body_weight: parsedBodyWeight,
+          })
+        );
       } else {
         console.error("File upload failed; workout not started.");
       }
     } else if (source === "0") {
-      // Emit directly if using the live camera
-      socket.emit("start_workout", {
-        source: "0",
-        workout_type: workoutType,
-        body_weight: parsedBodyWeight, // Include workout type
-      });
+      socket.send(
+        JSON.stringify({
+          action: "start_workout",
+          source: "0",
+          workout_type: workoutType,
+          body_weight: parsedBodyWeight,
+        })
+      );
     }
   };
 
   const handleSourceChange = (e) => {
     setSource(e.target.value);
-    setFile(null); // Clear the selected file if changing source
-    setError(""); // Clear any previous errors
+    setFile(null);
+    setError("");
   };
 
   const handleStopWorkout = () => {
-    socket.emit("stop_workout");
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      console.log("Sending stop_workout action to backend...");
+      socket.send(JSON.stringify({ action: "stop_workout" }));
+    } else {
+      console.error(
+        "WebSocket is not open. Unable to send stop_workout action."
+      );
+    }
   };
-
   return (
     <>
       <header className="bg-white shadow-md py-8 fixed top-0 left-0 w-full z-50">
         <div className="container mx-auto flex justify-between items-center px-4">
-          <a href="#home" className="text-3xl font-bold text-orange-500">
-            {/* Use Link component for navigation */}
-            <Link to="/" className="text-3xl font-bold text-orange-500">
-              GymFluencer
-            </Link>
-          </a>
+          {/* Use Link component for navigation */}
+          <Link to="/" className="text-3xl font-bold text-orange-500">
+            GymFluencer
+          </Link>
 
           {/* <nav className="hidden md:flex space-x-8 text-gray-700">
             <a href="#features" className="text-lg hover:text-orange-500">
@@ -252,7 +249,7 @@ function WorkoutAnalysis() {
         </div>
 
         {/* Workout Summary Section */}
-        {summary && (
+        {summary && Object.keys(summary).length > 0 ? (
           <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md mb-8 mx-auto text-center">
             <h2 className="text-2xl font-semibold mb-6">Workout Summary</h2>
             {Object.keys(summary).map((workout) => (
@@ -261,18 +258,21 @@ function WorkoutAnalysis() {
                   <strong className="font-semibold">Workout:</strong> {workout}
                 </p>
                 <p className="text-lg mt-2">
-                  <strong className="font-semibold">Total Reps:</strong>{" "}
-                  {summary[workout].reps}
+                  <strong className="font-semibold">Total Reps:</strong>
+                  {summary[workout].reps || 0}
                 </p>
                 <p className="text-lg mt-2">
-                  <strong className="font-semibold">Total Calories:</strong>{" "}
-                  {summary[workout].calories.toFixed(2)}
+                  <strong className="font-semibold">Total Calories:</strong>
+                  {(summary[workout].calories || 0).toFixed(2)}
                 </p>
               </div>
             ))}
           </div>
+        ) : (
+          <p className="text-center text-lg text-gray-600">
+            No workout summary available.
+          </p>
         )}
-
         {/* Real-time Feedback Section */}
         {feedback && (
           <div className="bg-white p-6 rounded-lg shadow-lg w-full mx-8 my-4">

@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
-import io from "socket.io-client";
+import React, { useState } from "react";
+// import io from "socket.io-client";
 import { marked } from "marked";
 
-const socket = io("http://localhost:5000");
+// const socket = io("http://localhost:8000");
 
 function DietPlanForm() {
   const [formData, setFormData] = useState({
@@ -27,16 +27,16 @@ function DietPlanForm() {
 
   const [dietPlan, setDietPlan] = useState(null);
 
-  useEffect(() => {
-    // Listen for the diet plan emitted from the backend
-    socket.on("diet_plan", (data) => {
-      setDietPlan(data.diet_plan);
-    });
+  //   useEffect(() => {
+  //     // Listen for the diet plan emitted from the backend
+  //     socket.on("diet_plan", (data) => {
+  //       setDietPlan(data.diet_plan);
+  //     });
 
-    return () => {
-      socket.off("diet_plan");
-    };
-  }, []);
+  //     return () => {
+  //       socket.off("diet_plan");
+  //     };
+  //   }, []);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -79,7 +79,7 @@ function DietPlanForm() {
     };
 
     try {
-      const response = await fetch("http://localhost:5000/submit_diet_info", {
+      const response = await fetch("http://localhost:8000/submit_diet_info", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -88,9 +88,14 @@ function DietPlanForm() {
       });
 
       const result = await response.json();
-      console.log("Response:", result);
+      if (response.ok) {
+        // Set the workout plan from the response
+        setDietPlan(result.diet_plan);
+      } else {
+        console.error("Error:", result.message);
+      }
     } catch (error) {
-      console.error("Error submitting diet data:", error);
+      console.error("Error submitting fitness data:", error);
     }
   };
 
