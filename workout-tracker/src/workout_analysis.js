@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 
 function WorkoutAnalysis() {
   const [file, setFile] = useState(null);
+
   const [source, setSource] = useState("file");
   const [summary, setSummary] = useState(null);
   const [frame, setFrame] = useState(null);
@@ -15,7 +16,8 @@ function WorkoutAnalysis() {
   const [socket, setSocket] = useState(null);
 
   useEffect(() => {
-    const ws = new WebSocket("ws://localhost:8000/ws");
+    const ws = new WebSocket("ws://34.229.143.21:3000/ws");
+
     setSocket(ws);
 
     ws.onmessage = async (event) => {
@@ -60,7 +62,7 @@ function WorkoutAnalysis() {
     const formData = new FormData();
     formData.append("file", file);
 
-    return fetch("http://localhost:8000/upload", {
+    return fetch("http://34.229.143.21:3000/upload", {
       method: "POST",
       body: formData,
     })

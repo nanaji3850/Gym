@@ -79,13 +79,16 @@ function DietPlanForm() {
     };
 
     try {
-      const response = await fetch("http://localhost:8000/submit_diet_info", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(dietData),
-      });
+      const response = await fetch(
+        "http://34.229.143.21:3000/submit_diet_info",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(dietData),
+        }
+      );
 
       const result = await response.json();
       if (response.ok) {
