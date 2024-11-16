@@ -1,4 +1,5 @@
 import os
+import re
 from fastapi import FastAPI, Request, WebSocket,WebSocketDisconnect, UploadFile, File, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -30,7 +31,11 @@ app.add_middleware(
 )
 
 UPLOAD_FOLDER = './uploads'
-
+absolute_path = os.path.abspath(UPLOAD_FOLDER)
+print(f"Absolute path for uploads directory: {absolute_path}")
+# Ensure the uploads directory exists
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
 
 
 
@@ -408,12 +413,17 @@ async def submit_diet_info(request: Request):
 async def upload_file(file: UploadFile = File(...)):
     if not file:
         raise HTTPException(status_code=400, detail="No file part")
+    
+    # Sanitize filename to avoid illegal characters on Windows
+    file.filename = re.sub(r'[<>:"/\\|?*]', '_', file.filename)
 
-    file_path = os.path.join(UPLOAD_FOLDER, file.filename)
-    with open(file_path, "wb") as buffer:
-        buffer.write(await file.read())
-
-    return JSONResponse(content={"filename": file.filename})
+    file_path = os.path.join(absolute_path, file.filename)
+    try:
+        with open(file_path, "wb") as buffer:
+            buffer.write(await file.read())
+        return JSONResponse(content={"filename": file.filename})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
@@ -552,4 +562,4 @@ async def handle_stop_workout(websocket: WebSocket):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=3000)
+    uvicorn.run(app, host="0.0.0.0", port=8000)
