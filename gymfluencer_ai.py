@@ -385,6 +385,19 @@ def count_reps(landmarks, workout_type, body_weight):
 
             down_angle = 0
 
+@app.post("/submit_contact_form")
+async def submit_contact_form(request: Request):
+    form_data = await request.json()
+
+    # Validate the form data
+    if not form_data.get("name") or not form_data.get("email") or not form_data.get("message"):
+        raise HTTPException(status_code=400, detail="All fields are required")
+
+    # Simulate processing the data (e.g., save to database, send email)
+    print(f"Received contact form submission: {form_data}")
+
+    return JSONResponse(content={"message": "Your message has been received. We'll get back to you shortly!"})
+
 @app.post("/submit_fitness_info")
 async def submit_fitness_info(request: Request):
     fitness_info = await request.json()

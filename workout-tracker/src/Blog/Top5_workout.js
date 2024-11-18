@@ -13,12 +13,41 @@ const WorkoutRoutinesArticle = () => {
               GymFluencer
             </Link>
           </a>
+          <nav className="hidden md:flex space-x-8 text-gray-700 bg-white shadow-lg p-4 rounded-lg">
+            {/* <a
+              href="#features"
+              className="text-lg hover:text-orange-500 transition-colors"
+            >
+              Features
+            </a> */}
+            <a
+              href="/blog"
+              className="text-lg hover:text-orange-500 transition-colors"
+            >
+              Blog
+            </a>
+            {/* <a
+              href="#faqs"
+              className="text-lg hover:text-orange-500 transition-colors"
+            >
+              FAQs
+            </a> */}
+            <Link
+              to="/diet-plan"
+              className="text-lg hover:text-orange-500 transition-colors"
+            >
+              Diet Plan
+            </Link>
+            <Link
+              to="/workout-plans"
+              className="text-lg hover:text-orange-500 transition-colors"
+            >
+              Workout Plans
+            </Link>
+          </nav>
 
           {/* Right Side: Buttons */}
           <div className="space-x-4">
-            <button className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600">
-              Get Started
-            </button>
             <button className="px-6 py-2 bg-green-600 rounded-full border-2 border-white text-white shadow-lg hover:bg-green-400 hover:shadow-xl">
               Download Now
             </button>

@@ -1,3 +1,7 @@
+/* @tailwind base;
+@tailwind components;
+@tailwind utilities; */
+
 body,
 html {
   margin: 0;
@@ -76,16 +80,18 @@ html {
   scroll-behavior: smooth;
 }
 
-@keyframes fadeIn {
+/* @keyframes fadeInUp {
   0% {
     opacity: 0;
+    transform: translateY(30px);
   }
   100% {
     opacity: 1;
+    transform: translateY(0);
   }
 }
 
 .fade-in {
   opacity: 0;
-  animation: fadeIn 1s forwards;
-}
+  animation: fadeIn 2s forwards;
+} */

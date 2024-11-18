@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Update this line
+import { Link, useNavigate } from "react-router-dom"; // Update this line
 import "./Home.css";
 const Home = () => {
   // const initialValue = "";
@@ -23,28 +23,55 @@ const Home = () => {
       <header className="bg-white shadow-md py-8 fixed top-0 left-0 w-full z-50">
         <div className="container mx-auto flex justify-between items-center px-4">
           {/* Left Side: Logo */}
-          <a href="#home" className="text-3xl font-bold text-orange-500">
+          <a
+            href="#home"
+            className="text-3xl font-extrabold text-black-500 shadow-md transition-transform duration-300 transform hover:scale-110"
+          >
             GymFluencer
           </a>
 
           {/* Middle: Navigation Links */}
-          <nav className="hidden md:flex space-x-8 text-gray-700">
-            <a href="#features" className="text-lg hover:text-orange-500">
+          <nav className="hidden md:flex space-x-8 text-gray-700 bg-white shadow-lg p-4 rounded-lg font-semibold">
+            <a
+              href="#features"
+              className="text-lg hover:text-orange-500 transition-colors transition-transform duration-300 transform hover:scale-110"
+            >
               Features
             </a>
-            <a href="/blog" className="text-lg hover:text-orange-500">
+            <a
+              href="/blog"
+              className="text-lg hover:text-orange-500 transition-colors transition-transform duration-300 transform hover:scale-110"
+            >
               Blog
             </a>
-            <a href="#faqs" className="text-lg hover:text-orange-500">
+            <a
+              href="#faqs"
+              className="text-lg hover:text-orange-500 transition-colors transition-transform duration-300 transform hover:scale-110"
+            >
               FAQs
+            </a>
+            <Link
+              to="/diet-plan"
+              className="text-lg hover:text-orange-500 transition-colors transition-transform duration-300 transform hover:scale-110"
+            >
+              Diet Plan
+            </Link>
+            <Link
+              to="/workout-plans"
+              className="text-lg hover:text-orange-500 transition-colors transition-transform duration-300 transform hover:scale-110"
+            >
+              Workout Plans
+            </Link>
+            <a
+              href="/contact"
+              className="text-lg hover:text-blue-500 transition-colors transition-transform duration-300 transform hover:scale-110"
+            >
+              Contact Us
             </a>
           </nav>
 
           {/* Right Side: Buttons */}
           <div className="space-x-4">
-            <button className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600">
-              Get Started
-            </button>
             <button className="px-6 py-2 bg-green-600 rounded-full border-2 border-white text-white shadow-lg hover:bg-green-400 hover:shadow-xl">
               Download Now
             </button>
@@ -55,26 +82,31 @@ const Home = () => {
       {/* Hero Section */}
       <div
         id="home"
-        className="hero-section bg-cover bg-center h-screen flex flex-col items-center justify-center text-white text-center pt-16"
+        className="hero-section bg-cover bg-center h-screen flex flex-col items-center justify-center text-white text-center pt-16 relative overflow-hidden "
       >
-        <h1 className="text-4xl md:text-5xl font-bold">
+        {/* Animated Heading */}
+        <h1 className="text-4xl md:text-5xl font-bold relative opacity-0 animate-heading ">
           Track Your Fitness Journey
         </h1>
-        <p className="text-lg md:text-xl max-w-lg mt-4">
+
+        {/* Animated Paragraph */}
+        <p className="text-lg md:text-xl max-w-lg mt-4 opacity-0 animate-paragraph">
           Discover the ultimate fitness companion with GymFluencer. Effortlessly
           log your workouts, count reps, and track calories burned. Stay
           motivated and achieve your goals with our user-friendly interface.
         </p>
+
+        {/* Buttons */}
         <div className="buttons mt-6 space-x-4">
           <button
-            className="px-6 py-2 bg-green-600 rounded-full border-2 border-white text-white shadow-lg hover:bg-green-400 hover:shadow-xl"
+            className="px-6 py-2 bg-green-600 rounded-full border-2 border-white text-white shadow-lg hover:bg-green-400 hover:shadow-xl hover:scale-105 transform transition-all duration-300"
             onClick={handleGetStartedClick}
           >
             Get Started
           </button>
-          <button className="px-6 py-2 bg-transparent rounded-full border-2 border-white text-white shadow-lg hover:bg-green-400 hover:shadow-xl">
+          {/* <button className="px-6 py-2 bg-transparent rounded-full border-2 border-white text-white shadow-lg hover:bg-green-400 hover:shadow-xl hover:scale-105 transform transition-all duration-300">
             Learn More
-          </button>
+          </button> */}
         </div>
       </div>
 
@@ -82,12 +114,12 @@ const Home = () => {
       <div id="features" className="features-section py-16 bg-gray-100">
         <div className="container mx-auto flex flex-col md:flex-row items-center text-center md:text-left space-y-6 md:space-y-0 md:space-x-8">
           <div className="features-heading md:w-1/3">
-            <h2 className="text-3xl text-orange-500 font-semibold">
+            <h2 className="text-3xl text-orange-500 font-semibold transition-transform duration-300 transform hover:scale-110">
               Discover Our App's Key Features
             </h2>
           </div>
           <div className="features-description md:w-2/3">
-            <p className="text-xl text-gray-700">
+            <p className="text-xl text-gray-700 font-semibold transition-transform duration-300 transform hover:scale-110">
               GymFluencer is your ultimate fitness companion, designed to help
               you track your workouts with ease. Our app allows you to log
               exercises, count reps, and calculate calories burned, all through
@@ -98,18 +130,18 @@ const Home = () => {
         </div>
 
         {/* Feature Images Section */}
-        <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8 container mx-auto">
+        <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8 container mx-auto mt-20">
           {/* First Image and Content */}
-          <div className="flex flex-col items-center text-center">
+          <div className="flex flex-col items-center text-center transition-transform duration-300 transform hover:scale-110">
             <img
               src="https://10web-site.ai/125/wp-content/uploads/sites/137/2024/11/tenweb_media_cApR2UsM.webp"
               alt="Effortless Workout Logging"
-              className="w-3/4 object-contain rounded-lg mb-4 fadeInImage"
+              className="w-3/4 object-contain rounded-lg mb-4 fadeInUp"
             />
-            <h3 className="text-2xl font-semibold">
+            <h3 className="text-2xl font-semibold transition-transform duration-300 transform hover:scale-110">
               Effortless Workout Logging
             </h3>
-            <p className="text-gray-700 mt-4">
+            <p className="text-gray-700 mt-4 transition-transform duration-300 transform hover:scale-110">
               Easily log your workouts and monitor your progress over time with
               our intuitive logging feature. Stay organized and track your
               fitness journey with precision.
@@ -117,14 +149,16 @@ const Home = () => {
           </div>
 
           {/* Second Image and Content */}
-          <div className="flex flex-col items-center text-center">
+          <div className="flex flex-col items-center text-center transition-transform duration-300 transform hover:scale-110">
             <img
               src="https://10web-site.ai/125/wp-content/uploads/sites/137/2024/11/tenweb_media_9G5pk73k.webp"
               alt="Accurate Rep Counting"
-              className="w-3/4 object-contain rounded-lg mb-4 fade-in"
+              className="w-3/4 object-contain rounded-lg mb-4  fadeInImage"
             />
-            <h3 className="text-2xl font-semibold">Accurate Rep Counting</h3>
-            <p className="text-gray-700 mt-4">
+            <h3 className="text-2xl font-semibold transition-transform duration-300 transform hover:scale-110">
+              Accurate Rep Counting
+            </h3>
+            <p className="text-gray-700 mt-4 transition-transform duration-300 transform hover:scale-110">
               Count your reps accurately with our app, ensuring each workout is
               tracked effectively. Perfect for maintaining consistency and
               improving your performance.
@@ -132,46 +166,48 @@ const Home = () => {
           </div>
 
           {/* Third Image and Content */}
-          <div className="flex flex-col items-center text-center">
+          <div className="flex flex-col items-center text-center transition-transform duration-300 transform hover:scale-110">
             <img
               src="https://10web-site.ai/125/wp-content/uploads/sites/137/2024/11/tenweb_media_MgjrARDS.webp"
               alt="Calorie Calculation Made Easy"
-              className="w-3/4 object-contain rounded-lg mb-4 fade-in"
+              className="w-3/4 object-contain rounded-lg mb-4  fadeInImage"
             />
-            <h3 className="text-2xl font-semibold">
+            <h3 className="text-2xl font-semibold transition-transform duration-300 transform hover:scale-110">
               Calorie Calculation Made Easy
             </h3>
-            <p className="text-gray-700 mt-4">
+            <p className="text-gray-700 mt-4 transition-transform duration-300 transform hover:scale-110">
               Calculate calories burned during your workouts to help manage your
               fitness goals. Our app provides precise data to keep you informed
               and motivated.
             </p>
           </div>
 
-          <div className="flex flex-col items-center text-center mt-4">
+          <div className="flex flex-col items-center text-center mt-4 transition-transform duration-300 transform hover:scale-110">
             <img
               src="https://media.istockphoto.com/id/154961329/photo/exercise-schedule.jpg?s=612x612&w=0&k=20&c=4cVjbGIa82QmVA_lxA9JW0LZrCao6PaJSmvystWqINk="
               alt="Effortless Workout Logging"
-              className="w-3/4 object-contain rounded-lg mb-4 fade-in"
+              className="w-3/4 object-contain rounded-lg mb-4  fadeInImage"
             />
-            <h3 className="text-2xl font-semibold">
+            <h3 className="text-2xl font-semibold transition-transform duration-300 transform hover:scale-110">
               personalized workout plan
             </h3>
-            <p className="text-gray-700 mt-4">
+            <p className="text-gray-700 mt-4 transition-transform duration-300 transform hover:scale-110">
               An AI-powered personalized workout plan adapts exercises to your
               fitness level, goals, and progress, helping you stay motivated and
               achieve results faster.
             </p>
           </div>
 
-          <div className="flex flex-col items-center text-center mt-4">
+          <div className="flex flex-col items-center text-center mt-4 transition-transform duration-300 transform hover:scale-110">
             <img
               src="https://t4.ftcdn.net/jpg/01/82/40/43/360_F_182404327_IFFLPLSstIccSD1Qy2kccZSWNIswrJ9z.jpg"
               alt="Effortless Workout Logging"
-              className="w-3/4 object-contain rounded-lg mb-4 fade-in"
+              className="w-3/4 object-contain rounded-lg mb-4  fadeInImage"
             />
-            <h3 className="text-2xl font-semibold">personalized Diet plan</h3>
-            <p className="text-gray-700 mt-4">
+            <h3 className="text-2xl font-semibold transition-transform duration-300 transform hover:scale-110">
+              personalized Diet plan
+            </h3>
+            <p className="text-gray-700 mt-4 transition-transform duration-300 transform hover:scale-110">
               An AI diet plan customizes meals to your health goals,
               preferences, and lifestyle, offering tailored, nutritious
               suggestions to support optimal wellness.
@@ -181,25 +217,28 @@ const Home = () => {
       </div>
 
       {/* Step Section */}
-      <div className="step-section py-16 bg-white">
+      <div className="step-section py-16 bg-white ">
         <div className="container mx-auto">
           {/* Step 1 */}
-          <div className="flex items-center text-center md:text-left mb-12">
-            <a href="#home" className="md:w-1/2">
+          <div className="flex items-center text-center md:text-left mb-12 ">
+            <a
+              href="#home"
+              className="md:w-1/2 transition-transform duration-300 transform hover:scale-110"
+            >
               <img
                 src="https://10web-site.ai/125/wp-content/uploads/sites/137/2024/11/tenweb_media_Trl6VOLI.webp"
                 alt="Step 1: Open the app"
-                className="w-3/4 object-contain rounded-lg mb-4 cursor-pointer fade-in"
+                className="w-3/4 object-contain rounded-lg mb-4 cursor-pointer animate-slideUp "
               />
             </a>
-            <div className="md:w-1/2 md:pl-6">
+            <div className="md:w-1/2 md:pl-6 transition-transform duration-300 transform hover:scale-110">
               <a href="#home">
-                <h3 className="text-5xl font-semibold text-orange-600 cursor-pointer">
+                <h3 className="text-5xl font-semibold text-orange-600 cursor-pointer transition-transform duration-300 transform hover:scale-110">
                   Step 1: Open the app
                 </h3>
               </a>
               <a href="#home">
-                <p className="text-xl text-gray-800 mt-4 cursor-pointer">
+                <p className="text-xl text-gray-800 mt-4 cursor-pointer transition-transform duration-300 transform hover:scale-110">
                   Start by opening the GymFluencer app on your smartphone. The
                   intuitive home screen gives you quick access to all features.
                 </p>
@@ -211,18 +250,21 @@ const Home = () => {
           <div className="flex items-center text-center md:text-left mb-12">
             <div className="md:w-1/2 md:pr-6">
               <a href="#home">
-                <h3 className="text-5xl font-semibold text-orange-600 cursor-pointer">
+                <h3 className="text-5xl font-semibold text-orange-600 cursor-pointer transition-transform duration-300 transform hover:scale-110">
                   Step 2: Log Your Exercises
                 </h3>
               </a>
               <a href="#home">
-                <p className="text-xl text-gray-800 mt-4 cursor-pointer">
+                <p className="text-xl text-gray-800 mt-4 cursor-pointer transition-transform duration-300 transform hover:scale-110">
                   Easily log your exercises by selecting from a wide range of
                   activities. Track your progress with detailed logs.
                 </p>
               </a>
             </div>
-            <a href="#home" className="md:w-1/2">
+            <a
+              href="#home"
+              className="md:w-1/2 transition-transform duration-300 transform hover:scale-110"
+            >
               <img
                 src="https://10web-site.ai/125/wp-content/uploads/sites/137/2024/11/tenweb_media_xhrd64lC.webp"
                 alt="Step 2: Log Your Exercises"
@@ -233,7 +275,10 @@ const Home = () => {
 
           {/* Step 3 */}
           <div className="flex items-center text-center md:text-left mb-12">
-            <a href="#home" className="md:w-1/2">
+            <a
+              href="#home"
+              className="md:w-1/2 transition-transform duration-300 transform hover:scale-110"
+            >
               <img
                 src="https://10web-site.ai/125/wp-content/uploads/sites/137/2024/11/tenweb_media_GuNbS7jd.webp"
                 alt="Step 3: Count Your Reps"
@@ -242,12 +287,12 @@ const Home = () => {
             </a>
             <div className="md:w-1/2 md:pl-6">
               <a href="#home">
-                <h3 className="text-5xl font-semibold text-orange-600 cursor-pointer">
+                <h3 className="text-5xl font-semibold text-orange-600 cursor-pointer transition-transform duration-300 transform hover:scale-110">
                   Step 3: Count Your Reps
                 </h3>
               </a>
               <a href="#home">
-                <p className="text-xl text-gray-800 mt-4 cursor-pointer">
+                <p className="text-xl text-gray-800 mt-4 cursor-pointer transition-transform duration-300 transform hover:scale-110">
                   Count your reps with precision, ensuring every detail is
                   logged. Stay informed on your progress.
                 </p>
@@ -259,18 +304,21 @@ const Home = () => {
           <div className="flex items-center text-center md:text-left mb-12">
             <div className="md:w-1/2 md:pr-6">
               <a href="#home">
-                <h3 className="text-5xl font-semibold text-orange-600 cursor-pointer">
+                <h3 className="text-5xl font-semibold text-orange-600 cursor-pointer transition-transform duration-300 transform hover:scale-110">
                   Step 4: Track Your Progress
                 </h3>
               </a>
               <a href="#home">
-                <p className="text-xl text-gray-800 mt-4 cursor-pointer">
+                <p className="text-xl text-gray-800 mt-4 cursor-pointer transition-transform duration-300 transform hover:scale-110">
                   Review your workout stats and progress over time to stay
                   motivated and reach your fitness goals.
                 </p>
               </a>
             </div>
-            <a href="#home" className="md:w-1/2">
+            <a
+              href="#home"
+              className="md:w-1/2 transition-transform duration-300 transform hover:scale-110"
+            >
               <img
                 src="https://10web-site.ai/125/wp-content/uploads/sites/137/2024/11/tenweb_media_9PLQkVJu.webp"
                 alt="Step 4: Track Your Progress"
@@ -280,7 +328,10 @@ const Home = () => {
           </div>
 
           <div class="flex items-center text-center md:text-left mb-12">
-            <a href="#home" class="md:w-1/2">
+            <a
+              href="#home"
+              class="md:w-1/2 transition-transform duration-300 transform hover:scale-110"
+            >
               <img
                 src="https://10web-site.ai/125/wp-content/uploads/sites/137/2024/11/tenweb_media_JlDEzv2X.webp"
                 alt="Step 5: Review Your Progress"
@@ -289,12 +340,12 @@ const Home = () => {
             </a>
             <div class="md:w-1/2 md:pl-6">
               <a href="#home">
-                <h3 class="text-5xl font-semibold text-orange-600 cursor-pointer">
+                <h3 class="text-5xl font-semibold text-orange-600 cursor-pointer transition-transform duration-300 transform hover:scale-110">
                   Step 5: Review Your Progress
                 </h3>
               </a>
               <a href="#home">
-                <p class="text-xl text-gray-800 mt-4 cursor-pointer">
+                <p class="text-xl text-gray-800 mt-4 cursor-pointer transition-transform duration-300 transform hover:scale-110">
                   Check your workout summaries and progress over time to stay
                   motivated and achieve your fitness goals.
                 </p>
@@ -306,11 +357,11 @@ const Home = () => {
 
       <div class="what-users-say py-16 bg-gray-100">
         <div class="container mx-auto text-center">
-          <h2 class="text-5xl text-orange-500 font-semibold mb-6">
+          <h2 class="text-5xl text-black-500 font-semibold mb-6 transition-transform duration-300 transform hover:scale-110">
             What Users <span class="text-red-500">Say</span>
           </h2>
           <div class="flex flex-wrap justify-center">
-            <div class="w-full md:w-1/3 p-4">
+            <div class="w-full md:w-1/3 p-4 transition-transform duration-300 transform hover:scale-110">
               <div class="border rounded-lg p-8 bg-gray-400">
                 <h3 class="text-xl font-semibold">"Best Fitness App!"</h3>
                 <p class="text-white mt-2">
@@ -323,7 +374,7 @@ const Home = () => {
               </div>
             </div>
 
-            <div class="w-full md:w-1/3 p-4">
+            <div class="w-full md:w-1/3 p-4 transition-transform duration-300 transform hover:scale-110">
               <div class="border rounded-lg p-8 bg-gray-400">
                 <h3 class="text-xl font-semibold">"So Easy to Use!"</h3>
                 <p class="text-white mt-2">
@@ -336,7 +387,7 @@ const Home = () => {
               </div>
             </div>
 
-            <div class="w-full md:w-1/3 p-4">
+            <div class="w-full md:w-1/3 p-4 transition-transform duration-300 transform hover:scale-110">
               <div class="border rounded-lg p-8 bg-gray-400">
                 <h3 class="text-xl font-semibold">
                   "Incredible Progress Tracker!"

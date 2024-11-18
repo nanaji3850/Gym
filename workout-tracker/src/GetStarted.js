@@ -93,41 +93,69 @@ function GetStarted() {
     <>
       <header className="bg-white shadow-md py-8 fixed top-0 left-0 w-full z-50">
         <div className="container mx-auto flex justify-between items-center px-4">
-          <a href="#home" className="text-3xl font-bold text-orange-500">
-            {/* Use Link component for navigation */}
-            <Link to="/" className="text-3xl font-bold text-orange-500">
-              GymFluencer
-            </Link>
-          </a>
+          {/* Left Side: Logo */}
+          <Link
+            to="/"
+            className="text-3xl font-extrabold text-black-500 shadow-md transition-transform duration-300 transform hover:scale-110"
+          >
+            GymFluencer
+          </Link>
 
-          {/* <nav className="hidden md:flex space-x-8 text-gray-700">
-            <a href="#features" className="text-lg hover:text-orange-500">
+          {/* Middle: Navigation Links */}
+          <nav className="hidden md:flex space-x-8 text-gray-700 bg-white shadow-lg p-4 rounded-lg font-semibold">
+            {/* <a
+              href="#features"
+              className="text-lg hover:text-orange-500 transition-colors"
+            >
               Features
-            </a>
-            <a href="#blog" className="text-lg hover:text-orange-500">
+            </a> */}
+            <a
+              href="/blog"
+              className="text-lg hover:text-orange-500 transition-colors "
+            >
               Blog
             </a>
-            <a href="#faqs" className="text-lg hover:text-orange-500">
+            {/* <a
+              href="#faqs"
+              className="text-lg hover:text-orange-500 transition-colors"
+            >
               FAQs
+            </a> */}
+            <Link
+              to="/diet-plan"
+              className="text-lg hover:text-orange-500 transition-colors"
+            >
+              Diet Plan
+            </Link>
+            <Link
+              to="/workout-plans"
+              className="text-lg hover:text-orange-500 transition-colors"
+            >
+              Workout Plans
+            </Link>
+            <a
+              href="/contact"
+              className="text-lg hover:text-blue-500 transition-colors transition-transform duration-300 transform hover:scale-110"
+            >
+              Contact Us
             </a>
-          </nav> */}
+          </nav>
 
+          {/* Right Side: Buttons */}
           <div className="space-x-4">
-            <button className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600">
-              Get Started
-            </button>
             <button className="px-6 py-2 bg-green-600 rounded-full border-2 border-white text-white shadow-lg hover:bg-green-400 hover:shadow-xl">
               Download Now
             </button>
           </div>
         </div>
       </header>
-
       <div className="hero-section1 bg-cover bg-center h-screen flex flex-col items-center justify-center text-black text-center pt-16">
-        <h1 className="text-4xl md:text-5xl font-bold">
+        <h1 className="text-4xl md:text-5xl font-bold relative opacity-0 animate-heading ">
           Track Your Fitness Journey
         </h1>
-        <p className="text-lg md:text-xl max-w-lg mt-4 font-bold">
+
+        {/* Animated Paragraph */}
+        <p className="text-lg md:text-xl max-w-lg mt-4 opacity-0 animate-paragraph">
           Discover the ultimate fitness companion with GymFluencer. Effortlessly
           log your workouts, count reps, and track calories burned. Stay
           motivated and achieve your goals with our user-friendly interface.
@@ -135,14 +163,14 @@ function GetStarted() {
       </div>
 
       <div className="container mx-auto py-10 mt-10">
-        <h2 className="text-4xl font-bold text-center mb-6">
+        <h2 className="text-4xl font-bold text-center mb-6 transition-transform duration-300 transform hover:scale-110">
           Select Your Workout
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 ">
           {workouts.map((workout) => (
             <div
               key={workout.id}
-              className="border rounded-lg shadow-md cursor-pointer hover:shadow-lg transition-shadow duration-200"
+              className="border rounded-lg shadow-md cursor-pointer hover:shadow-lg transition-shadow duration-200 transition-transform duration-300 transform hover:scale-110"
               onClick={() => handleWorkoutClick(workout)}
             >
               <img
@@ -162,14 +190,14 @@ function GetStarted() {
       {/* Workout Plan Section */}
       {/* Workout Plan Section */}
       <div className="container mx-auto py-10 mt-10">
-        <h2 className="text-4xl font-bold text-center mb-6">
+        <h2 className="text-4xl font-bold text-center mb-6 transition-transform duration-300 transform hover:scale-110">
           Select Your Workout Plan
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {workoutPlans.map((plan) => (
             <div
               key={plan.id}
-              className="border rounded-lg shadow-md cursor-pointer hover:shadow-lg transition-shadow duration-200"
+              className="border rounded-lg shadow-md cursor-pointer hover:shadow-lg transition-shadow duration-200 transition-transform duration-300 transform hover:scale-110"
               onClick={() => handleWorkoutPlanClick(plan)}
             >
               <img

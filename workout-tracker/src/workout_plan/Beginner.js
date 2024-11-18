@@ -6,19 +6,48 @@ function Beginner() {
     <div className="min-h-screen bg-gray-50 py-10 px-4 sm:px-6 lg:px-8">
       <header className="bg-white shadow-md py-8 fixed top-0 left-0 w-full z-50">
         <div className="container mx-auto flex justify-between items-center px-4">
-          {/* Left Side: Logo */}
-          <a href="#home" className="text-3xl font-bold text-orange-500">
-            {/* Use Link component for navigation */}
-            <Link to="/" className="text-3xl font-bold text-orange-500">
-              GymFluencer
-            </Link>
-          </a>
+          {/* Use Link component for navigation */}
+          <Link
+            to="/"
+            className="text-3xl font-extrabold text-black-500 shadow-md transition-transform duration-300 transform hover:scale-110"
+          >
+            GymFluencer
+          </Link>
 
-          {/* Right Side: Buttons */}
+          <nav className="hidden md:flex space-x-8 text-gray-700 bg-white shadow-lg p-4 rounded-lg font-semibold">
+            {/* <a
+              href="#features"
+              className="text-lg hover:text-orange-500 transition-colors"
+            >
+              Features
+            </a> */}
+            <a
+              href="/blog"
+              className="text-lg hover:text-orange-500 transition-colors"
+            >
+              Blog
+            </a>
+            {/* <a
+              href="#faqs"
+              className="text-lg hover:text-orange-500 transition-colors"
+            >
+              FAQs
+            </a> */}
+            <Link
+              to="/diet-plan"
+              className="text-lg hover:text-orange-500 transition-colors"
+            >
+              Diet Plan
+            </Link>
+            <Link
+              to="/workout-plans"
+              className="text-lg hover:text-orange-500 transition-colors"
+            >
+              Workout Plans
+            </Link>
+          </nav>
+
           <div className="space-x-4">
-            <button className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600">
-              Get Started
-            </button>
             <button className="px-6 py-2 bg-green-600 rounded-full border-2 border-white text-white shadow-lg hover:bg-green-400 hover:shadow-xl">
               Download Now
             </button>

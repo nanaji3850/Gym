@@ -3,6 +3,7 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"; // Corrected import
 import Home from "./Home";
 import GetStarted from "./GetStarted";
+import ContactUs from "./ContactUs";
 import WorkoutAnalysis from "./workout_analysis";
 import WeightLossDiet from "./DietPlan/WeightLossDiet";
 import MuscleBuilding from "./DietPlan/MuscleBuilding";
@@ -16,6 +17,9 @@ import FitnessJourneyArticle from "./Blog/FitnessJourneyArticle";
 import Top5_workout from "./Blog/Top5_workout";
 import Nutrition_tips from "./Blog/Nutrition_tips";
 import ImportantOfRestDays from "./Blog/ImportantOfRestDays";
+import DietPlan from "./DietPlan/DietPlan";
+import WorkoutPlanPage from "./workout_plan/WorkoutPlanPage";
+
 function App() {
   return (
     <Router>
@@ -23,6 +27,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/blog" element={<Blog />} />
         <Route path="/get-started" element={<GetStarted />} />
+        <Route path="/contact" element={<ContactUs />} />
         <Route path="/workout_analysis/:id" element={<WorkoutAnalysis />} />
         <Route path="/weight-loss-diet" element={<WeightLossDiet />} />
         <Route path="/muscle_building" element={<MuscleBuilding />} />
@@ -35,6 +40,8 @@ function App() {
         <Route path="/Top5_workout" element={<Top5_workout />} />
         <Route path="/Nutrition_tip" element={<Nutrition_tips />} />
         <Route path="/Rest_days" element={<ImportantOfRestDays />} />
+        <Route path="/diet-plan" element={<DietPlan />} />
+        <Route path="/workout-plans" element={<WorkoutPlanPage />} />
       </Routes>
     </Router>
   );

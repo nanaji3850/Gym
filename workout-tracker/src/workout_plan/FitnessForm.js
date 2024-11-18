@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 // import io from "socket.io-client";
 import { marked } from "marked";
+import { Link } from "react-router-dom";
 
 // const socket = io("http://localhost:8000");
 function FitnessForm() {
@@ -104,34 +105,55 @@ function FitnessForm() {
     <>
       <header className="bg-white shadow-md py-8 fixed top-0 left-0 w-full z-50">
         <div className="container mx-auto flex justify-between items-center px-4">
-          <a href="#home" className="text-3xl font-bold text-orange-500">
+          {/* Use Link component for navigation */}
+          <Link
+            to="/"
+            className="text-3xl font-extrabold text-black-500 shadow-md transition-transform duration-300 transform hover:scale-110"
+          >
             GymFluencer
-          </a>
+          </Link>
 
-          {/* <nav className="hidden md:flex space-x-8 text-gray-700">
-            <a href="#features" className="text-lg hover:text-orange-500">
+          <nav className="hidden md:flex space-x-8 text-gray-700 bg-white shadow-lg p-4 rounded-lg font-semibold">
+            {/* <a
+              href="#features"
+              className="text-lg hover:text-orange-500 transition-colors"
+            >
               Features
-            </a>
-            <a href="#blog" className="text-lg hover:text-orange-500">
+            </a> */}
+            <a
+              href="/blog"
+              className="text-lg hover:text-orange-500 transition-colors"
+            >
               Blog
             </a>
-            <a href="#faqs" className="text-lg hover:text-orange-500">
+            {/* <a
+              href="#faqs"
+              className="text-lg hover:text-orange-500 transition-colors"
+            >
               FAQs
-            </a>
-          </nav> */}
+            </a> */}
+            <Link
+              to="/diet-plan"
+              className="text-lg hover:text-orange-500 transition-colors"
+            >
+              Diet Plan
+            </Link>
+            <Link
+              to="/workout-plans"
+              className="text-lg hover:text-orange-500 transition-colors"
+            >
+              Workout Plans
+            </Link>
+          </nav>
 
           <div className="space-x-4">
-            <button className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600">
-              Get Started
-            </button>
             <button className="px-6 py-2 bg-green-600 rounded-full border-2 border-white text-white shadow-lg hover:bg-green-400 hover:shadow-xl">
               Download Now
             </button>
           </div>
         </div>
       </header>
-
-      <div className="min-h-screen flex justify-center items-center bg-gray-100 p-6 mt-20">
+      <div className="min-h-screen flex justify-center items-center bg-blue-100 p-6 mt-20">
         <div className="w-full max-w-4xl p-8 bg-white rounded-lg shadow-lg">
           <h2 className="text-3xl font-bold text-center mb-6 text-blue-600">
             User Fitness Information
