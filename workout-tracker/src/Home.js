@@ -419,7 +419,7 @@ const Home = () => {
               className="md:w-1/2 transition-transform duration-300 transform hover:scale-105"
             >
               <img
-                src="https://files.oaiusercontent.com/file-Dt7EJVrzusq7vxHvYkoec7?se=2024-11-29T10%3A23%3A39Z&sp=r&sv=2024-08-04&sr=b&rscc=max-age%3D604800%2C%20immutable%2C%20private&rscd=attachment%3B%20filename%3D138d7413-516d-4a75-a1bd-1a502b73f441.webp&sig=dKfK6k8ouIELddeqABdttBTH80UvC5vb3H5O1QHo4io%3D"
+                src="/images/step1.webp"
                 alt="Step 1: Open the app"
                 className="w-3/4 object-contain rounded-lg mb-4 cursor-pointer animate-slideUp "
               />
@@ -459,7 +459,7 @@ const Home = () => {
               className="md:w-1/2 transition-transform duration-300 transform hover:scale-105"
             >
               <img
-                src="https://files.oaiusercontent.com/file-Jm3FbjogCdDYjSPTSWAXAM?se=2024-11-29T10%3A28%3A38Z&sp=r&sv=2024-08-04&sr=b&rscc=max-age%3D604800%2C%20immutable%2C%20private&rscd=attachment%3B%20filename%3Dd76ad764-662a-45c3-a4d2-c38adbeff9c3.webp&sig=kwhnYrWFPztbEmYsu2s3STGjPKkmwnHmZOSi0PRXqyM%3D"
+                src="/images/step2.webp"
                 alt="Step 2: Log Your Exercises"
                 className="w-3/4 object-contain rounded-lg mb-4 cursor-pointer"
               />
@@ -473,7 +473,7 @@ const Home = () => {
               className="md:w-1/2 transition-transform duration-300 transform hover:scale-105"
             >
               <img
-                src="https://files.oaiusercontent.com/file-SN5qPgX9fdFn1zaLpBA4SR?se=2024-11-29T10%3A30%3A49Z&sp=r&sv=2024-08-04&sr=b&rscc=max-age%3D604800%2C%20immutable%2C%20private&rscd=attachment%3B%20filename%3D4a912b47-d3c7-4343-a581-2e0c86a3d4e1.webp&sig=Fvd5a0dZ6weRYFuZufjjU9QlPtP/krJjlS6jlXhNpo0%3D"
+                src="/images/step3.webp"
                 alt="Step 3: Count Your Reps"
                 className="w-3/4 object-contain rounded-lg mb-4 cursor-pointer"
               />
@@ -513,7 +513,7 @@ const Home = () => {
               className="md:w-1/2 transition-transform duration-300 transform hover:scale-105"
             >
               <img
-                src="https://files.oaiusercontent.com/file-65X1jtRdFthGQeRt6sEB4Z?se=2024-11-29T10%3A36%3A21Z&sp=r&sv=2024-08-04&sr=b&rscc=max-age%3D604800%2C%20immutable%2C%20private&rscd=attachment%3B%20filename%3D0c3b89f5-b70f-4071-86c4-aced70a1cd39.webp&sig=7JnJPkFCSvTzeIOsR%2BcX5Dytpvu7gP1ORlnd6s46uY8%3D"
+                src="/images/step4.webp"
                 alt="Step 4: Track Your Progress"
                 className="w-3/4 object-contain rounded-lg mb-4 cursor-pointer"
               />
@@ -526,7 +526,7 @@ const Home = () => {
               className="md:w-1/2 transition-transform duration-300 transform hover:scale-105"
             >
               <img
-                src="https://files.oaiusercontent.com/file-AkoCw8kU8W3rU6RmhUmbtS?se=2024-11-29T10%3A33%3A26Z&sp=r&sv=2024-08-04&sr=b&rscc=max-age%3D604800%2C%20immutable%2C%20private&rscd=attachment%3B%20filename%3Db636e58a-560a-49f7-9ad2-520fcfbfaeca.webp&sig=tG7Adpv7IWQZ6VBl6FHfWyofIdDnNw9TVKFiQxkaCyc%3D"
+                src="/images/step5.webp"
                 alt="Step 5: Review Your Progress"
                 className="w-3/4 object-contain rounded-lg mb-4 cursor-pointer"
               />
