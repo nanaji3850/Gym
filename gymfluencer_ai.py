@@ -68,7 +68,7 @@ def get_password_hash(password):
     return pwd_context.hash(password)
 
 # Signup endpoint
-@app.post("/signup")
+@app.post("/api/signup")
 async def signup(request: Request):
     data = await request.json()
     username = data.get("username")
@@ -89,7 +89,7 @@ async def signup(request: Request):
     return JSONResponse({"message": "User created successfully"}, status_code=201)
 
 # Login endpoint
-@app.post("/login")
+@app.post("/api/login")
 async def login(request: Request):
     data = await request.json()
     username = data.get("username")
@@ -112,7 +112,7 @@ async def login(request: Request):
 class ForgotPasswordRequest(BaseModel):
     username: str
 
-@app.post("/forgot-password")
+@app.post("/api/forgot-password")
 async def forgot_password(request: ForgotPasswordRequest):
     username = request.username
     print(username)
@@ -136,7 +136,7 @@ class ResetPasswordRequest(BaseModel):
     username: str
     new_password: str
 
-@app.post("/reset-password")
+@app.post("/api/reset-password")
 async def reset_password(request: ResetPasswordRequest):
     username = request.username
     new_password = request.new_password
@@ -174,7 +174,7 @@ def get_current_user(token: str = Depends(OAuth2PasswordBearer)):
         raise credentials_exception
 
 # Example protected route (requires authentication)
-@app.get("/protected")
+@app.get("/api/protected")
 async def protected_route(current_user: str = Depends(get_current_user)):
     return {"message": f"Welcome {current_user}, you are authorized to access this route."}
 
