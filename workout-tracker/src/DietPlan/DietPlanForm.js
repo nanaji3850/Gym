@@ -85,7 +85,7 @@ function DietPlanForm() {
 
     try {
       const response = await fetch(
-        "https://gym.birlaventures.com/submit_diet_info",
+        "https://gym.birlaventures.com:8000/submit_diet_info",
         {
           method: "POST",
           headers: {
