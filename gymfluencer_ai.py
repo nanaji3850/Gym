@@ -679,7 +679,7 @@ def save_workout_plan(user_id, workout_plan):
         print(f"Error saving workout plan: {e}")
 
 # Example route for saving a workout
-@app.post("/save-workout")
+@app.post("/api/save-workout")
 async def save_workout(request: Request):
     try:
         data = await request.json()
@@ -696,7 +696,7 @@ async def save_workout(request: Request):
         return JSONResponse(content={"error": str(e)}, status_code=500)
 
 # Example route for saving plans
-@app.post("/save-diet-plan")
+@app.post("/api/save-diet-plan")
 async def save_diet(request: Request):
     try:
         data = await request.json()
@@ -707,7 +707,7 @@ async def save_diet(request: Request):
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
 
-@app.post("/save-workout-plan")
+@app.post("/api/save-workout-plan")
 async def save_plan(request: Request):
     try:
         data = await request.json()
@@ -719,7 +719,7 @@ async def save_plan(request: Request):
         return JSONResponse(content={"error": str(e)}, status_code=500)
 
 
-@app.post("/submit_contact_form")
+@app.post("/api/submit_contact_form")
 async def submit_contact_form(request: Request):
     form_data = await request.json()
 
@@ -732,7 +732,7 @@ async def submit_contact_form(request: Request):
 
     return JSONResponse(content={"message": "Your message has been received. We'll get back to you shortly!"})
 
-@app.post("/submit_fitness_info")
+@app.post("/api/submit_fitness_info")
 async def submit_fitness_info(request: Request):
     fitness_info = await request.json()
 
@@ -758,7 +758,7 @@ async def submit_fitness_info(request: Request):
     
     return JSONResponse(content={"message": "Fitness information submitted successfully!","workout_plan": workout_plan, "save_status": save_message})
 
-@app.post("/submit_diet_info")
+@app.post("/api/submit_diet_info")
 async def submit_diet_info(request: Request):
     diet_info = await request.json()
 
@@ -783,7 +783,7 @@ async def submit_diet_info(request: Request):
     
     return JSONResponse(content={"message": "Diet information submitted successfully!","diet_plan": diet_plan,"save_status": save_message})
 
-@app.post("/upload")
+@app.post("/api/upload")
 async def upload_file(file: UploadFile = File(...)):
     if not file:
         raise HTTPException(status_code=400, detail="No file part")
