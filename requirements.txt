@@ -7,3 +7,4 @@ openai==0.28.0
 python-dotenv
 python-multipart
 httpx
+jwt
