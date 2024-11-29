@@ -19,7 +19,7 @@ const Home = () => {
   useEffect(() => {
     // Fetch diet plans
 
-    fetch(`http://localhost:8000/api/user/diet-plans?user_id=${userId}`)
+    fetch(`http://34.229.143.21:8000/api/user/diet-plans?user_id=${userId}`)
       .then((res) => res.json())
       .then((data) => {
         setDietPlans(data.diet_plans || []);
@@ -32,7 +32,7 @@ const Home = () => {
 
     // Fetch workout plans
 
-    fetch(`http://localhost:8000/api/user/workout-plans?user_id=${userId}`)
+    fetch(`http://34.229.143.21:8000/api/user/workout-plans?user_id=${userId}`)
       .then((res) => res.json())
       .then((data) => {
         console.log("Workout Plans Data:", data);
