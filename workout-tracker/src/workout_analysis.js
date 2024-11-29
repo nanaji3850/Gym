@@ -50,7 +50,9 @@ function WorkoutAnalysis() {
     ArcElement // For Pie Charts
   );
   useEffect(() => {
-    fetch(`http://34.229.143.21:8000/api/get-aggregated-data?user_id=${userId}`) // Replace with your actual API
+    fetch(
+      `https://34.229.143.21:8000/api/get-aggregated-data?user_id=${userId}`
+    ) // Replace with your actual API
       .then((res) => res.json())
       .then((response) => {
         setData(response.data);
@@ -60,7 +62,7 @@ function WorkoutAnalysis() {
   }, []);
 
   useEffect(() => {
-    const ws = new WebSocket("ws://34.229.143.21:8000/ws");
+    const ws = new WebSocket("wss://gym.birlaventures.com/ws");
     setSocket(ws);
 
     ws.onopen = () => {
@@ -164,7 +166,7 @@ function WorkoutAnalysis() {
     const formData = new FormData();
     formData.append("file", file);
 
-    return fetch("http://34.229.143.21:8000/upload", {
+    return fetch("https://34.229.143.21:8000/upload", {
       method: "POST",
       body: formData,
     })

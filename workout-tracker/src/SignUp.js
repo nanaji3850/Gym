@@ -12,7 +12,7 @@ function Signup() {
     e.preventDefault();
     if (password === confirmPassword) {
       try {
-        const response = await fetch("http://34.229.143.21:8000/signup", {
+        const response = await fetch("https://34.229.143.21:8000/signup", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

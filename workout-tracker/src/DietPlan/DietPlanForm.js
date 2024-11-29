@@ -85,7 +85,7 @@ function DietPlanForm() {
 
     try {
       const response = await fetch(
-        "http://34.229.143.21:8000/submit_diet_info",
+        "https://34.229.143.21:8000/submit_diet_info",
         {
           method: "POST",
           headers: {

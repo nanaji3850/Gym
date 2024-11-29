@@ -15,7 +15,7 @@ function ForgotPassword() {
     // Send request to check if the username exists
     try {
       const response = await fetch(
-        "http://34.229.143.21:8000/forgot-password",
+        "https://34.229.143.21:8000/forgot-password",
         {
           method: "POST",
           headers: {
@@ -45,16 +45,19 @@ function ForgotPassword() {
     }
 
     try {
-      const response = await fetch("http://34.229.143.21:8000/reset-password", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username: username,
-          new_password: newPassword,
-        }),
-      });
+      const response = await fetch(
+        "https://34.229.143.21:8000/reset-password",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username: username,
+            new_password: newPassword,
+          }),
+        }
+      );
       const data = await response.json();
 
       if (response.ok) {

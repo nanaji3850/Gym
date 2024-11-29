@@ -19,7 +19,7 @@ const Home = () => {
   useEffect(() => {
     // Fetch diet plans
 
-    fetch(`http://34.229.143.21:8000/api/user/diet-plans?user_id=${userId}`)
+    fetch(`https://34.229.143.21:8000/api/user/diet-plans?user_id=${userId}`)
       .then((res) => res.json())
       .then((data) => {
         setDietPlans(data.diet_plans || []);
@@ -32,7 +32,7 @@ const Home = () => {
 
     // Fetch workout plans
 
-    fetch(`http://34.229.143.21:8000/api/user/workout-plans?user_id=${userId}`)
+    fetch(`https://34.229.143.21:8000/api/user/workout-plans?user_id=${userId}`)
       .then((res) => res.json())
       .then((data) => {
         console.log("Workout Plans Data:", data);
@@ -325,7 +325,7 @@ const Home = () => {
           {/* First Image and Content */}
           <div className="flex flex-col items-center text-center transition-transform duration-300 transform hover:scale-110">
             <img
-              src="https://10web-site.ai/125/wp-content/uploads/sites/137/2024/11/tenweb_media_cApR2UsM.webp"
+              src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSR_s8UeYtpJ3dOox5yUAO65DQrNg1foGTxuQ&s"
               alt="Effortless Workout Logging"
               className="w-3/4 object-contain rounded-lg mb-4 fadeInUp"
             />
@@ -342,7 +342,7 @@ const Home = () => {
           {/* Second Image and Content */}
           <div className="flex flex-col items-center text-center transition-transform duration-300 transform hover:scale-110">
             <img
-              src="https://10web-site.ai/125/wp-content/uploads/sites/137/2024/11/tenweb_media_9G5pk73k.webp"
+              src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT9Bc6IYpr8HNechbgQ5VrhfREhsWxjrxErUxtvwDO5TU0UpA61R-HSuXuciemi2wZb6Dk&usqp=CAU"
               alt="Accurate Rep Counting"
               className="w-3/4 object-contain rounded-lg mb-4  fadeInImage"
             />
@@ -359,7 +359,7 @@ const Home = () => {
           {/* Third Image and Content */}
           <div className="flex flex-col items-center text-center transition-transform duration-300 transform hover:scale-110">
             <img
-              src="https://10web-site.ai/125/wp-content/uploads/sites/137/2024/11/tenweb_media_MgjrARDS.webp"
+              src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQaB1ZB0RCPmnhKla38zd4C1jOPazRuZxp-1g&s"
               alt="Calorie Calculation Made Easy"
               className="w-3/4 object-contain rounded-lg mb-4  fadeInImage"
             />
@@ -417,7 +417,7 @@ const Home = () => {
               className="md:w-1/2 transition-transform duration-300 transform hover:scale-105"
             >
               <img
-                src="https://10web-site.ai/125/wp-content/uploads/sites/137/2024/11/tenweb_media_Trl6VOLI.webp"
+                src="https://files.oaiusercontent.com/file-Dt7EJVrzusq7vxHvYkoec7?se=2024-11-29T10%3A23%3A39Z&sp=r&sv=2024-08-04&sr=b&rscc=max-age%3D604800%2C%20immutable%2C%20private&rscd=attachment%3B%20filename%3D138d7413-516d-4a75-a1bd-1a502b73f441.webp&sig=dKfK6k8ouIELddeqABdttBTH80UvC5vb3H5O1QHo4io%3D"
                 alt="Step 1: Open the app"
                 className="w-3/4 object-contain rounded-lg mb-4 cursor-pointer animate-slideUp "
               />
@@ -457,7 +457,7 @@ const Home = () => {
               className="md:w-1/2 transition-transform duration-300 transform hover:scale-105"
             >
               <img
-                src="https://10web-site.ai/125/wp-content/uploads/sites/137/2024/11/tenweb_media_xhrd64lC.webp"
+                src="https://files.oaiusercontent.com/file-Jm3FbjogCdDYjSPTSWAXAM?se=2024-11-29T10%3A28%3A38Z&sp=r&sv=2024-08-04&sr=b&rscc=max-age%3D604800%2C%20immutable%2C%20private&rscd=attachment%3B%20filename%3Dd76ad764-662a-45c3-a4d2-c38adbeff9c3.webp&sig=kwhnYrWFPztbEmYsu2s3STGjPKkmwnHmZOSi0PRXqyM%3D"
                 alt="Step 2: Log Your Exercises"
                 className="w-3/4 object-contain rounded-lg mb-4 cursor-pointer"
               />
@@ -471,7 +471,7 @@ const Home = () => {
               className="md:w-1/2 transition-transform duration-300 transform hover:scale-105"
             >
               <img
-                src="https://10web-site.ai/125/wp-content/uploads/sites/137/2024/11/tenweb_media_GuNbS7jd.webp"
+                src="https://files.oaiusercontent.com/file-SN5qPgX9fdFn1zaLpBA4SR?se=2024-11-29T10%3A30%3A49Z&sp=r&sv=2024-08-04&sr=b&rscc=max-age%3D604800%2C%20immutable%2C%20private&rscd=attachment%3B%20filename%3D4a912b47-d3c7-4343-a581-2e0c86a3d4e1.webp&sig=Fvd5a0dZ6weRYFuZufjjU9QlPtP/krJjlS6jlXhNpo0%3D"
                 alt="Step 3: Count Your Reps"
                 className="w-3/4 object-contain rounded-lg mb-4 cursor-pointer"
               />
@@ -511,7 +511,7 @@ const Home = () => {
               className="md:w-1/2 transition-transform duration-300 transform hover:scale-105"
             >
               <img
-                src="https://10web-site.ai/125/wp-content/uploads/sites/137/2024/11/tenweb_media_9PLQkVJu.webp"
+                src="https://files.oaiusercontent.com/file-65X1jtRdFthGQeRt6sEB4Z?se=2024-11-29T10%3A36%3A21Z&sp=r&sv=2024-08-04&sr=b&rscc=max-age%3D604800%2C%20immutable%2C%20private&rscd=attachment%3B%20filename%3D0c3b89f5-b70f-4071-86c4-aced70a1cd39.webp&sig=7JnJPkFCSvTzeIOsR%2BcX5Dytpvu7gP1ORlnd6s46uY8%3D"
                 alt="Step 4: Track Your Progress"
                 className="w-3/4 object-contain rounded-lg mb-4 cursor-pointer"
               />
@@ -524,7 +524,7 @@ const Home = () => {
               className="md:w-1/2 transition-transform duration-300 transform hover:scale-105"
             >
               <img
-                src="https://10web-site.ai/125/wp-content/uploads/sites/137/2024/11/tenweb_media_JlDEzv2X.webp"
+                src="https://files.oaiusercontent.com/file-AkoCw8kU8W3rU6RmhUmbtS?se=2024-11-29T10%3A33%3A26Z&sp=r&sv=2024-08-04&sr=b&rscc=max-age%3D604800%2C%20immutable%2C%20private&rscd=attachment%3B%20filename%3Db636e58a-560a-49f7-9ad2-520fcfbfaeca.webp&sig=tG7Adpv7IWQZ6VBl6FHfWyofIdDnNw9TVKFiQxkaCyc%3D"
                 alt="Step 5: Review Your Progress"
                 className="w-3/4 object-contain rounded-lg mb-4 cursor-pointer"
               />
