@@ -14,7 +14,7 @@ const Header = () => {
 
   // Fetch Diet and Workout plans
   useEffect(() => {
-    fetch(`https://34.229.143.21:8000/api/user/diet-plans?user_id=${userId}`)
+    fetch(`https://gym.birlaventures.com/api/user/diet-plans?user_id=${userId}`)
       .then((res) => res.json())
       .then((data) => {
         setDietPlans(data.diet_plans || []);
@@ -25,7 +25,9 @@ const Header = () => {
       })
       .catch((err) => console.error("Error fetching diet plans:", err));
 
-    fetch(`https://34.229.143.21:8000/api/user/workout-plans?user_id=${userId}`)
+    fetch(
+      `https://gym.birlaventures.com/api/user/workout-plans?user_id=${userId}`
+    )
       .then((res) => res.json())
       .then((data) => {
         setWorkoutPlans(data.workout_plans || []);

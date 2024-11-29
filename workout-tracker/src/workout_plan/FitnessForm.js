@@ -82,7 +82,7 @@ function FitnessForm() {
 
     try {
       const response = await fetch(
-        "https://34.229.143.21:8000/submit_fitness_info",
+        "https://gym.birlaventures.com/submit_fitness_info",
         {
           method: "POST",
           headers: {

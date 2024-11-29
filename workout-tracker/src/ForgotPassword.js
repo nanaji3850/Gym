@@ -15,7 +15,7 @@ function ForgotPassword() {
     // Send request to check if the username exists
     try {
       const response = await fetch(
-        "https://34.229.143.21:8000/forgot-password",
+        "https://gym.birlaventures.com/forgot-password",
         {
           method: "POST",
           headers: {
@@ -46,7 +46,7 @@ function ForgotPassword() {
 
     try {
       const response = await fetch(
-        "https://34.229.143.21:8000/reset-password",
+        "https://gym.birlaventures.com/reset-password",
         {
           method: "POST",
           headers: {
