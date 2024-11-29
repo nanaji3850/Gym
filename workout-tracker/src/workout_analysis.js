@@ -62,7 +62,7 @@ function WorkoutAnalysis() {
   }, []);
 
   useEffect(() => {
-    const ws = new WebSocket("ws://gym.birlaventures.com:3000/ws");
+    const ws = new WebSocket("wss://gym.birlaventures.com:3000/ws");
     setSocket(ws);
 
     ws.onopen = () => {
