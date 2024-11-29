@@ -19,9 +19,7 @@ const Home = () => {
   useEffect(() => {
     // Fetch diet plans
 
-    fetch(
-      `https://gym.birlaventures.com:8000/api/user/diet-plans?user_id=${userId}`
-    )
+    fetch(`https://gym.birlaventures.com/api/user/diet-plans?user_id=${userId}`)
       .then((res) => res.json())
       .then((data) => {
         setDietPlans(data.diet_plans || []);
@@ -35,7 +33,7 @@ const Home = () => {
     // Fetch workout plans
 
     fetch(
-      `https://gym.birlaventures.com:8000/api/user/workout-plans?user_id=${userId}`
+      `https://gym.birlaventures.com/api/user/workout-plans?user_id=${userId}`
     )
       .then((res) => res.json())
       .then((data) => {

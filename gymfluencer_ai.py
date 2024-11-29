@@ -748,7 +748,7 @@ async def submit_fitness_info(request: Request):
 
         # Make an internal HTTP call to /save-workout-plan
     async with httpx.AsyncClient() as client:
-        response = await client.post("https://gym.birlaventures.com:8000/save-workout-plan", json=payload)
+        response = await client.post("https://gym.birlaventures.com/save-workout-plan", json=payload)
 
      # Parse response from /save-workout-plan
     if response.status_code == 200:
@@ -773,7 +773,7 @@ async def submit_diet_info(request: Request):
 
         # Make an internal HTTP call to /save-workout-plan
     async with httpx.AsyncClient() as client:
-        response = await client.post("https://gym.birlaventures.com:8000/save-diet-plan", json=payload)
+        response = await client.post("https://gym.birlaventures.com/save-diet-plan", json=payload)
 
      # Parse response from /save-workout-plan
     if response.status_code == 200:
@@ -973,7 +973,7 @@ async def handle_start_workout(websocket: WebSocket, data: dict):
         
         # Make an internal HTTP call to /save-workout-plan
         async with httpx.AsyncClient() as client:
-            response = await client.post("https://gym.birlaventures.com:8000/save-workout", json=payload)
+            response = await client.post("https://gym.birlaventures.com/save-workout", json=payload)
 
         summary = {workout_type: {'reps': rep_count[workout_type], 'calories': calories_burned[workout_type]}}
        
@@ -1015,7 +1015,7 @@ async def handle_stop_workout(websocket: WebSocket,workout_type,username):
         
         # Make an internal HTTP call to /save-workout-plan
     async with httpx.AsyncClient() as client:
-        response = await client.post("https://gym.birlaventures.com:8000/save-workout", json=payload)
+        response = await client.post("https://gym.birlaventures.com/save-workout", json=payload)
 
     feedback = generate_workout_feedback(workout_type, reps_data)
        

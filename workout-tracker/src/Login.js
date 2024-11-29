@@ -10,7 +10,7 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("https://gym.birlaventures.com:8000/login", {
+      const response = await fetch("https://gym.birlaventures.com/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -24,7 +24,7 @@ const ContactUs = () => {
     e.preventDefault();
     try {
       const response = await fetch(
-        "https://gym.birlaventures.com:8000/submit_contact_form",
+        "https://gym.birlaventures.com/submit_contact_form",
         {
           method: "POST",
           headers: {

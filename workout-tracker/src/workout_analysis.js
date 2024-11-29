@@ -51,7 +51,7 @@ function WorkoutAnalysis() {
   );
   useEffect(() => {
     fetch(
-      `https://gym.birlaventures.com:8000/api/get-aggregated-data?user_id=${userId}`
+      `https://gym.birlaventures.com/api/get-aggregated-data?user_id=${userId}`
     ) // Replace with your actual API
       .then((res) => res.json())
       .then((response) => {
@@ -62,7 +62,7 @@ function WorkoutAnalysis() {
   }, []);
 
   useEffect(() => {
-    const ws = new WebSocket("ws://gym.birlaventures.com:8000/ws");
+    const ws = new WebSocket("ws://gym.birlaventures.com/ws");
     setSocket(ws);
 
     ws.onopen = () => {
@@ -166,7 +166,7 @@ function WorkoutAnalysis() {
     const formData = new FormData();
     formData.append("file", file);
 
-    return fetch("https://gym.birlaventures.com:8000/upload", {
+    return fetch("https://gym.birlaventures.com/upload", {
       method: "POST",
       body: formData,
     })

@@ -12,19 +12,16 @@ function Signup() {
     e.preventDefault();
     if (password === confirmPassword) {
       try {
-        const response = await fetch(
-          "https://gym.birlaventures.com:8000/signup",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              username: username,
-              password: password,
-            }),
-          }
-        );
+        const response = await fetch("https://gym.birlaventures.com/signup", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username: username,
+            password: password,
+          }),
+        });
         const data = await response.json();
         if (response.ok) {
           console.log("Signup successful", data);
