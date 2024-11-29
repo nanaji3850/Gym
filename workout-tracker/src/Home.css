@@ -9,6 +9,8 @@ html {
   font-family: Arial, sans-serif;
   color: #333;
   box-sizing: border-box;
+  height: 100%; /* Ensures full height for body and html */
+  width: 100%; /* Ensures full width for body and html */
 }
 
 /* Hero Section Customization */

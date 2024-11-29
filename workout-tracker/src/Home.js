@@ -1,11 +1,60 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom"; // Update this line
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom"; // Update this line
 import "./Home.css";
 const Home = () => {
-  // const initialValue = "";
-  const navigate = useNavigate(); // Use useNavigate instead
-  // const [someState, setSomeState] = useState(initialValue);
-  // State to track which FAQ is open
+  const [dropdownVisible, setDropdownVisible] = useState(false);
+  const [username, setUsername] = useState(null);
+  const navigate = useNavigate();
+  const [dietPlans, setDietPlans] = useState([]);
+  const [workoutPlans, setWorkoutPlans] = useState([]);
+  const [showDietDropdown, setShowDietDropdown] = useState(false);
+  const [showWorkoutDropdown, setShowWorkoutDropdown] = useState(false);
+  // const [selectedDietPlan, setSelectedDietPlan] = useState(null); // state to track selected diet plan
+  // const [selectedWorkoutPlan, setSelectedWorkoutPlan] = useState(null); // state to track selected workout plan
+
+  // Get the logged-in username from localStorage
+  const userId = localStorage.getItem("username");
+  console.log("Retrieved User ID:", userId);
+
+  useEffect(() => {
+    // Fetch diet plans
+
+    fetch(`http://localhost:8000/api/user/diet-plans?user_id=${userId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setDietPlans(data.diet_plans || []);
+        localStorage.setItem(
+          "dietPlans",
+          JSON.stringify(data.diet_plans || [])
+        );
+      })
+      .catch((err) => console.error("Error fetching diet plans:", err));
+
+    // Fetch workout plans
+
+    fetch(`http://localhost:8000/api/user/workout-plans?user_id=${userId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("Workout Plans Data:", data);
+        setWorkoutPlans(data.workout_plans || []);
+
+        // Store workout plans in localStorage
+        localStorage.setItem(
+          "workoutPlans",
+          JSON.stringify(data.workout_plans || [])
+        );
+      })
+
+      .catch((err) => console.error("Error fetching workout plans:", err));
+  }, [userId]);
+
+  useEffect(() => {
+    const storedUsername = localStorage.getItem("username");
+    if (storedUsername) {
+      setUsername(storedUsername);
+    }
+  }, []);
+
   const [openFAQ, setOpenFAQ] = useState(null);
 
   // Function to toggle answer visibility
@@ -17,10 +66,34 @@ const Home = () => {
     navigate("/get-started"); // Use navigate to go to GetStarted page
   };
 
+  const handleLoginClick = () => {
+    navigate("/login"); // Redirect to login page
+  };
+
+  const handleLogout = () => {
+    // Clear user data
+    localStorage.removeItem("username");
+    localStorage.removeItem("access_token");
+    setUsername(null);
+    setDropdownVisible(false);
+    navigate("/"); // Redirect to login page
+  };
+  const handleUsernameClick = () => {
+    setDropdownVisible((prev) => !prev); // Toggle dropdown visibility
+  };
+
+  const handleWorkoutClick = (index) => {
+    navigate(`/workout-plan/${index}`);
+  };
+
+  const handleDietClick = (index) => {
+    navigate(`/diet-plan/${index}`); // set selected diet plan
+  };
+
   return (
     <div>
       {/* Header Section */}
-      <header className="bg-white shadow-md py-8 fixed top-0 left-0 w-full z-50">
+      <header className="bg-white shadow-md py-6 fixed top-0 left-0 w-full z-50">
         <div className="container mx-auto flex justify-between items-center px-4">
           {/* Left Side: Logo */}
           <a
@@ -31,13 +104,92 @@ const Home = () => {
           </a>
 
           {/* Middle: Navigation Links */}
-          <nav className="hidden md:flex space-x-8 text-gray-700 bg-white shadow-lg p-4 rounded-lg font-semibold">
+          <nav className="hidden md:flex space-x-8 text-gray-700 bg-white  p-1 rounded-lg font-semibold">
             <a
               href="#features"
               className="text-lg hover:text-orange-500 transition-colors transition-transform duration-300 transform hover:scale-110"
             >
               Features
             </a>
+            <div className="relative">
+              <button
+                className="text-lg hover:text-orange-500 transition-colors transition-transform duration-300 transform hover:scale-110 flex items-center"
+                onClick={() => (window.location.href = "/diet-plan")} // Redirect on clicking "Diet Plan"
+              >
+                Diet Plan
+                <span
+                  className="ml-1 text-base cursor-pointer hover:text-green-500"
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent triggering parent click
+                    setShowDietDropdown(!showDietDropdown); // Toggle dropdown
+                  }}
+                >
+                  ▼
+                </span>
+              </button>
+              {showDietDropdown && (
+                <ul className="absolute bg-white border border-gray-200 shadow-lg rounded-lg w-48 mt-2">
+                  {dietPlans.length > 0 ? (
+                    dietPlans.map((plan, index) => (
+                      <li
+                        key={index}
+                        className="px-4 py-2 text-gray-700 hover:bg-gray-100 cursor-pointer"
+                        onClick={() => handleDietClick(index)}
+                      >
+                        Your Diet Plan {index + 1}
+                      </li>
+                    ))
+                  ) : (
+                    <li className="px-4 py-2 text-gray-700">No Diet Plans</li>
+                  )}
+                </ul>
+              )}
+            </div>
+
+            {/* Workout Plans Dropdown */}
+            <div className="relative">
+              <button
+                className="text-lg hover:text-orange-500 transition-colors transition-transform duration-300 transform hover:scale-110 flex items-center"
+                onClick={() => (window.location.href = "/workout-plans")} // Redirect on clicking "Workout Plans"
+              >
+                Workout Plans
+                <span
+                  className="ml-1 text-base cursor-pointer hover:text-green-500"
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent triggering parent click
+                    setShowWorkoutDropdown(!showWorkoutDropdown); // Toggle dropdown
+                  }}
+                >
+                  ▼
+                </span>
+              </button>
+              {showWorkoutDropdown && (
+                <ul className="absolute bg-white border border-gray-200 shadow-lg rounded-lg w-48 mt-2">
+                  {workoutPlans.length > 0 ? (
+                    workoutPlans.map((plan, index) => (
+                      <li
+                        key={index}
+                        className="px-4 py-2 text-gray-700 hover:bg-gray-100 cursor-pointer"
+                        onClick={() => handleWorkoutClick(index)}
+                      >
+                        Your Workout Plan {index + 1}
+                      </li>
+                    ))
+                  ) : (
+                    <li className="px-4 py-2 text-gray-700">
+                      No Workout Plans
+                    </li>
+                  )}
+                </ul>
+              )}
+            </div>
+            {/* <Link
+              to="/workout_Diet-form"
+              className="text-lg hover:text-orange-500 transition-colors transition-transform duration-300 transform hover:scale-110"
+            >
+              Workout&Diet Plans
+            </Link> */}
+
             <a
               href="/blog"
               className="text-lg hover:text-orange-500 transition-colors transition-transform duration-300 transform hover:scale-110"
@@ -50,18 +202,6 @@ const Home = () => {
             >
               FAQs
             </a>
-            <Link
-              to="/diet-plan"
-              className="text-lg hover:text-orange-500 transition-colors transition-transform duration-300 transform hover:scale-110"
-            >
-              Diet Plan
-            </Link>
-            <Link
-              to="/workout-plans"
-              className="text-lg hover:text-orange-500 transition-colors transition-transform duration-300 transform hover:scale-110"
-            >
-              Workout Plans
-            </Link>
             <a
               href="/contact"
               className="text-lg hover:text-blue-500 transition-colors transition-transform duration-300 transform hover:scale-110"
@@ -71,13 +211,65 @@ const Home = () => {
           </nav>
 
           {/* Right Side: Buttons */}
-          <div className="space-x-4">
-            <button className="px-6 py-2 bg-green-600 rounded-full border-2 border-white text-white shadow-lg hover:bg-green-400 hover:shadow-xl">
-              Download Now
+          <div className="space-x-4 flex items-center">
+            {/* Always show Get Started button */}
+            <button
+              className="px-6 py-2 bg-green-600 rounded-full border-2 border-white text-white shadow-lg hover:bg-green-400 hover:shadow-xl hover:scale-105 transform transition-all duration-300"
+              onClick={handleGetStartedClick}
+            >
+              Get Started
             </button>
+
+            {/* Only show Login button if username is not present */}
+            {!username ? (
+              <button
+                className="px-6 py-2 bg-green-600 rounded-full border-2 border-white text-white shadow-lg hover:bg-green-400 hover:shadow-xl hover:scale-105 transform transition-all duration-300"
+                onClick={handleLoginClick}
+              >
+                Login
+              </button>
+            ) : (
+              // Show username and dropdown if logged in
+              <div className="relative">
+                <button
+                  className="px-6 py-2 bg-gray-200 rounded-full text-black shadow-lg hover:bg-gray-300 transform transition-all duration-300"
+                  onClick={handleUsernameClick}
+                >
+                  {username ? username.charAt(0).toUpperCase() : ""}
+                </button>
+                {/* Dropdown menu - Initially hidden */}
+                {dropdownVisible && (
+                  <ul className="absolute right-0 mt-2 bg-white border border-gray-200 shadow-lg rounded-lg w-48">
+                    <li
+                      className="px-4 py-2 text-gray-700 hover:bg-gray-100 cursor-pointer"
+                      onClick={handleLogout}
+                    >
+                      Logout
+                    </li>
+                  </ul>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </header>
+      {/* Display Selected Plan Details */}
+      {/* <div className="mt-12">
+        {selectedDietPlan && (
+          <div>
+            <h2>Your Selected Diet Plan</h2>
+            <p>{selectedDietPlan.name}</p>
+            <p>{selectedDietPlan.details}</p>
+          </div>
+        )}
+        {selectedWorkoutPlan && (
+          <div>
+            <h2>Your Selected Workout Plan</h2>
+            <p>{selectedWorkoutPlan.name}</p>
+            <p>{selectedWorkoutPlan.details}</p>
+          </div>
+        )}
+      </div> */}
 
       {/* Hero Section */}
       <div
@@ -96,14 +288,13 @@ const Home = () => {
           motivated and achieve your goals with our user-friendly interface.
         </p>
 
-        {/* Buttons */}
         <div className="buttons mt-6 space-x-4">
-          <button
+          {/* <button
             className="px-6 py-2 bg-green-600 rounded-full border-2 border-white text-white shadow-lg hover:bg-green-400 hover:shadow-xl hover:scale-105 transform transition-all duration-300"
             onClick={handleGetStartedClick}
           >
             Get Started
-          </button>
+          </button> */}
           {/* <button className="px-6 py-2 bg-transparent rounded-full border-2 border-white text-white shadow-lg hover:bg-green-400 hover:shadow-xl hover:scale-105 transform transition-all duration-300">
             Learn More
           </button> */}
@@ -121,10 +312,10 @@ const Home = () => {
           <div className="features-description md:w-2/3">
             <p className="text-xl text-gray-700 font-semibold transition-transform duration-300 transform hover:scale-110">
               GymFluencer is your ultimate fitness companion, designed to help
-              you track your workouts with ease. Our app allows you to log
-              exercises, count reps, and calculate calories burned, all through
-              a user-friendly interface. Whether you’re a beginner or a seasoned
-              athlete, our app will keep you motivated and on track.
+              you track your workouts with ease. Our application allows you to
+              log exercises, count reps, and calculate calories burned, all
+              through a user-friendly interface. Whether you’re a beginner or a
+              seasoned athlete, our app will keep you motivated and on track.
             </p>
           </div>
         </div>
@@ -223,7 +414,7 @@ const Home = () => {
           <div className="flex items-center text-center md:text-left mb-12 ">
             <a
               href="#home"
-              className="md:w-1/2 transition-transform duration-300 transform hover:scale-110"
+              className="md:w-1/2 transition-transform duration-300 transform hover:scale-105"
             >
               <img
                 src="https://10web-site.ai/125/wp-content/uploads/sites/137/2024/11/tenweb_media_Trl6VOLI.webp"
@@ -233,14 +424,14 @@ const Home = () => {
             </a>
             <div className="md:w-1/2 md:pl-6 transition-transform duration-300 transform hover:scale-110">
               <a href="#home">
-                <h3 className="text-5xl font-semibold text-orange-600 cursor-pointer transition-transform duration-300 transform hover:scale-110">
-                  Step 1: Open the app
+                <h3 className="text-4xl font-semibold text-orange-600 cursor-pointer transition-transform duration-300 transform hover:scale-105">
+                  Step 1: Click on Get Started
                 </h3>
               </a>
               <a href="#home">
-                <p className="text-xl text-gray-800 mt-4 cursor-pointer transition-transform duration-300 transform hover:scale-110">
-                  Start by opening the GymFluencer app on your smartphone. The
-                  intuitive home screen gives you quick access to all features.
+                <p className="text-xl text-gray-800 mt-4 cursor-pointer transition-transform duration-300 transform hover:scale-105">
+                  Start by opening the GymFluencer. The intuitive home screen
+                  gives you quick access to all features.
                 </p>
               </a>
             </div>
@@ -250,12 +441,12 @@ const Home = () => {
           <div className="flex items-center text-center md:text-left mb-12">
             <div className="md:w-1/2 md:pr-6">
               <a href="#home">
-                <h3 className="text-5xl font-semibold text-orange-600 cursor-pointer transition-transform duration-300 transform hover:scale-110">
+                <h3 className="text-4xl font-semibold text-orange-600 cursor-pointer transition-transform duration-300 transform hover:scale-105">
                   Step 2: Log Your Exercises
                 </h3>
               </a>
               <a href="#home">
-                <p className="text-xl text-gray-800 mt-4 cursor-pointer transition-transform duration-300 transform hover:scale-110">
+                <p className="text-xl text-gray-800 mt-4 cursor-pointer transition-transform duration-300 transform hover:scale-105">
                   Easily log your exercises by selecting from a wide range of
                   activities. Track your progress with detailed logs.
                 </p>
@@ -263,7 +454,7 @@ const Home = () => {
             </div>
             <a
               href="#home"
-              className="md:w-1/2 transition-transform duration-300 transform hover:scale-110"
+              className="md:w-1/2 transition-transform duration-300 transform hover:scale-105"
             >
               <img
                 src="https://10web-site.ai/125/wp-content/uploads/sites/137/2024/11/tenweb_media_xhrd64lC.webp"
@@ -277,7 +468,7 @@ const Home = () => {
           <div className="flex items-center text-center md:text-left mb-12">
             <a
               href="#home"
-              className="md:w-1/2 transition-transform duration-300 transform hover:scale-110"
+              className="md:w-1/2 transition-transform duration-300 transform hover:scale-105"
             >
               <img
                 src="https://10web-site.ai/125/wp-content/uploads/sites/137/2024/11/tenweb_media_GuNbS7jd.webp"
@@ -287,12 +478,12 @@ const Home = () => {
             </a>
             <div className="md:w-1/2 md:pl-6">
               <a href="#home">
-                <h3 className="text-5xl font-semibold text-orange-600 cursor-pointer transition-transform duration-300 transform hover:scale-110">
+                <h3 className="text-4xl font-semibold text-orange-600 cursor-pointer transition-transform duration-300 transform hover:scale-105">
                   Step 3: Count Your Reps
                 </h3>
               </a>
               <a href="#home">
-                <p className="text-xl text-gray-800 mt-4 cursor-pointer transition-transform duration-300 transform hover:scale-110">
+                <p className="text-xl text-gray-800 mt-4 cursor-pointer transition-transform duration-300 transform hover:scale-105">
                   Count your reps with precision, ensuring every detail is
                   logged. Stay informed on your progress.
                 </p>
@@ -304,12 +495,12 @@ const Home = () => {
           <div className="flex items-center text-center md:text-left mb-12">
             <div className="md:w-1/2 md:pr-6">
               <a href="#home">
-                <h3 className="text-5xl font-semibold text-orange-600 cursor-pointer transition-transform duration-300 transform hover:scale-110">
+                <h3 className="text-4xl font-semibold text-orange-600 cursor-pointer transition-transform duration-300 transform hover:scale-105">
                   Step 4: Track Your Progress
                 </h3>
               </a>
               <a href="#home">
-                <p className="text-xl text-gray-800 mt-4 cursor-pointer transition-transform duration-300 transform hover:scale-110">
+                <p className="text-xl text-gray-800 mt-4 cursor-pointer transition-transform duration-300 transform hover:scale-105">
                   Review your workout stats and progress over time to stay
                   motivated and reach your fitness goals.
                 </p>
@@ -317,7 +508,7 @@ const Home = () => {
             </div>
             <a
               href="#home"
-              className="md:w-1/2 transition-transform duration-300 transform hover:scale-110"
+              className="md:w-1/2 transition-transform duration-300 transform hover:scale-105"
             >
               <img
                 src="https://10web-site.ai/125/wp-content/uploads/sites/137/2024/11/tenweb_media_9PLQkVJu.webp"
@@ -327,25 +518,25 @@ const Home = () => {
             </a>
           </div>
 
-          <div class="flex items-center text-center md:text-left mb-12">
+          <div className="flex items-center text-center md:text-left mb-12">
             <a
               href="#home"
-              class="md:w-1/2 transition-transform duration-300 transform hover:scale-110"
+              className="md:w-1/2 transition-transform duration-300 transform hover:scale-105"
             >
               <img
                 src="https://10web-site.ai/125/wp-content/uploads/sites/137/2024/11/tenweb_media_JlDEzv2X.webp"
                 alt="Step 5: Review Your Progress"
-                class="w-3/4 object-contain rounded-lg mb-4 cursor-pointer"
+                className="w-3/4 object-contain rounded-lg mb-4 cursor-pointer"
               />
             </a>
-            <div class="md:w-1/2 md:pl-6">
+            <div className="md:w-1/2 md:pl-6">
               <a href="#home">
-                <h3 class="text-5xl font-semibold text-orange-600 cursor-pointer transition-transform duration-300 transform hover:scale-110">
+                <h3 className="text-4xl font-semibold text-orange-600 cursor-pointer transition-transform duration-300 transform hover:scale-105">
                   Step 5: Review Your Progress
                 </h3>
               </a>
               <a href="#home">
-                <p class="text-xl text-gray-800 mt-4 cursor-pointer transition-transform duration-300 transform hover:scale-110">
+                <p className="text-xl text-gray-800 mt-4 cursor-pointer transition-transform duration-300 transform hover:scale-105">
                   Check your workout summaries and progress over time to stay
                   motivated and achieve your fitness goals.
                 </p>
@@ -355,49 +546,49 @@ const Home = () => {
         </div>
       </div>
 
-      <div class="what-users-say py-16 bg-gray-100">
-        <div class="container mx-auto text-center">
-          <h2 class="text-5xl text-black-500 font-semibold mb-6 transition-transform duration-300 transform hover:scale-110">
-            What Users <span class="text-red-500">Say</span>
+      <div className="what-users-say py-16 bg-gray-100">
+        <div className="container mx-auto text-center">
+          <h2 className="text-4xl text-black-500 font-semibold mb-6 transition-transform duration-300 transform hover:scale-110">
+            What Users <span className="text-red-500">Say</span>
           </h2>
-          <div class="flex flex-wrap justify-center">
-            <div class="w-full md:w-1/3 p-4 transition-transform duration-300 transform hover:scale-110">
-              <div class="border rounded-lg p-8 bg-gray-400">
-                <h3 class="text-xl font-semibold">"Best Fitness App!"</h3>
-                <p class="text-white mt-2">
+          <div className="flex flex-wrap justify-center">
+            <div className="w-full md:w-1/3 p-4 transition-transform duration-300 transform hover:scale-110">
+              <div className="border rounded-lg p-8 bg-gray-400">
+                <h3 className="text-xl font-semibold">"Best Fitness App!"</h3>
+                <p className="text-white mt-2">
                   GymFluencer has transformed the way I work out. The rep
                   counting feature is a game-changer!
                 </p>
-                <div class="mt-2">
-                  <span class="text-yellow-400 text-3xl">★★★★★</span>
+                <div className="mt-2">
+                  <span className="text-yellow-400 text-3xl">★★★★★</span>
                 </div>
               </div>
             </div>
 
-            <div class="w-full md:w-1/3 p-4 transition-transform duration-300 transform hover:scale-110">
-              <div class="border rounded-lg p-8 bg-gray-400">
-                <h3 class="text-xl font-semibold">"So Easy to Use!"</h3>
-                <p class="text-white mt-2">
+            <div className="w-full md:w-1/3 p-4 transition-transform duration-300 transform hover:scale-110">
+              <div className="border rounded-lg p-8 bg-gray-400">
+                <h3 className="text-xl font-semibold">"So Easy to Use!"</h3>
+                <p className="text-white mt-2">
                   I love how user-friendly the app is. Logging workouts has
                   never been easier!
                 </p>
-                <div class="mt-2">
-                  <span class="text-yellow-400 text-3xl">★★★★★</span>
+                <div className="mt-2">
+                  <span className="text-yellow-400 text-3xl">★★★★★</span>
                 </div>
               </div>
             </div>
 
-            <div class="w-full md:w-1/3 p-4 transition-transform duration-300 transform hover:scale-110">
-              <div class="border rounded-lg p-8 bg-gray-400">
-                <h3 class="text-xl font-semibold">
+            <div className="w-full md:w-1/3 p-4 transition-transform duration-300 transform hover:scale-110">
+              <div className="border rounded-lg p-8 bg-gray-400">
+                <h3 className="text-xl font-semibold">
                   "Incredible Progress Tracker!"
                 </h3>
-                <p class="text-white mt-2">
+                <p className="text-white mt-2">
                   I've seen amazing results since using GymFluencer. The
                   progress tracking feature keeps me motivated!
                 </p>
-                <div class="mt-2">
-                  <span class="text-yellow-400 text-3xl">★★★★★</span>
+                <div className="mt-2">
+                  <span className="text-yellow-400 text-3xl">★★★★★</span>
                 </div>
               </div>
             </div>
@@ -405,18 +596,18 @@ const Home = () => {
         </div>
       </div>
 
-      <div id="faqs" class="faqs-section py-16 bg-gray-100">
-        <div class="container mx-auto">
-          <h2 class="text-5xl font-bold mb-4 text-left">FAQs</h2>
-          <p class="text-xl text-green-500 mb-8 text-left">
-            Find answers to your questions about the GymFluencer app, designed
-            to enhance your fitness journey.
+      <div id="faqs" className="faqs-section py-16 bg-gray-100">
+        <div className="container mx-auto">
+          <h2 className="text-3xl font-bold mb-4 text-left">FAQs</h2>
+          <p className="text-xl text-green-500 mb-8 text-left">
+            Find answers to your questions about the GymFluencer application,
+            designed to enhance your fitness journey.
           </p>
 
-          <div class="space-y-4">
+          <div className="space-y-4">
             <div className="border-b border-gray-600 pb-4">
               <h3
-                className="text-3xl font-semibold cursor-pointer flex justify-between items-center transition-all duration-500 hover:text-green-500"
+                className="text-2xl font-semibold cursor-pointer flex justify-between items-center transition-all duration-500 hover:text-green-500"
                 onClick={() => toggleAnswer("faq1")}
               >
                 How do I log my workouts?
@@ -441,7 +632,7 @@ const Home = () => {
             </div>
             <div className="border-b border-gray-600 pb-4">
               <h3
-                className="text-3xl font-semibold cursor-pointer flex justify-between items-center transition-all duration-500 hover:text-green-500"
+                className="text-2xl font-semibold cursor-pointer flex justify-between items-center transition-all duration-500 hover:text-green-500"
                 onClick={() => toggleAnswer("faq2")}
               >
                 Can I track my calories burned?
@@ -460,16 +651,16 @@ const Home = () => {
                     : "max-h-0 overflow-hidden"
                 }`}
               >
-                Yes, you can track calories burned through the app's integrated
-                tracking features.
+                Yes, you can track calories burned through the application
+                integrated tracking features.
               </p>
             </div>
             <div className="border-b border-gray-600 pb-4">
               <h3
-                className="text-3xl font-semibold cursor-pointer flex justify-between items-center transition-all duration-500 hover:text-green-500"
+                className="text-2xl font-semibold cursor-pointer flex justify-between items-center transition-all duration-500 hover:text-green-500"
                 onClick={() => toggleAnswer("faq3")}
               >
-                Is the app suitable for beginners?
+                Is this application suitable for beginners?
                 <span className="text-gray-600 ml-2 transition-transform duration-300">
                   <i
                     className={`fas fa-caret-${
@@ -491,10 +682,10 @@ const Home = () => {
             </div>
             <div className="border-b border-gray-600 pb-4">
               <h3
-                className="text-3xl font-semibold cursor-pointer flex justify-between items-center transition-all duration-500 hover:text-green-500"
+                className="text-2xl font-semibold cursor-pointer flex justify-between items-center transition-all duration-500 hover:text-green-500"
                 onClick={() => toggleAnswer("faq4")}
               >
-                What features does the app offer?
+                What features does the application offer?
                 <span className="text-gray-600 ml-2 transition-transform duration-300">
                   <i
                     className={`fas fa-caret-${
@@ -516,7 +707,7 @@ const Home = () => {
             </div>
             <div className="border-b border-gray-600 pb-4">
               <h3
-                className="text-3xl font-semibold cursor-pointer flex justify-between items-center transition-all duration-500 hover:text-green-500"
+                className="text-2xl font-semibold cursor-pointer flex justify-between items-center transition-all duration-500 hover:text-green-500"
                 onClick={() => toggleAnswer("faq5")}
               >
                 How can I reset my password?
