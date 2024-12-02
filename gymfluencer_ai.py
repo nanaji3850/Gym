@@ -7,6 +7,7 @@ import httpx
 from fastapi.security import OAuth2PasswordBearer
 import base64 
 # import json
+os.environ["QT_QPA_PLATFORM"] = "offscreen"
 import cv2
 import mediapipe as mp
 import math
@@ -954,11 +955,11 @@ async def handle_start_workout(websocket: WebSocket, data: dict):
             frame_data = buffer.tobytes()
             await websocket.send_bytes(frame_data)
 
-            # Brief pause to allow control flow back to event loop
-            # await asyncio.sleep(0.05)
+            # # Brief pause to allow control flow back to event loop
+            # # await asyncio.sleep(0.05)
 
-            if cv2.waitKey(10) & 0xFF == ord('q'):
-                break
+            # if cv2.waitKey(10) & 0xFF == ord('q'):
+            #     break
 
         cap.release()
         cv2.destroyAllWindows()
@@ -1101,7 +1102,7 @@ async def process_frame(websocket: WebSocket,frame, workout_type, body_weight):
                     cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
         cv2.putText(image, f'Calories: {calories_burned[workout_type]:.2f}', (10, 90), 
                     cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
-        cv2.imshow('Workout Counter', image)
+        # cv2.imshow('Workout Counter', image)
         _, buffer = cv2.imencode('.jpg', image)
         frame_data = base64.b64encode(buffer).decode('utf-8')
         # logging.info(f"Sending frame data to the client: {len(frame_data)} bytes")
