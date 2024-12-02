@@ -166,7 +166,7 @@ function WorkoutAnalysis() {
     const formData = new FormData();
     formData.append("file", file);
 
-    return fetch("https://gym.birlaventures.com/upload", {
+    return fetch("https://gym.birlaventures.com/api/upload", {
       method: "POST",
       body: formData,
     })
