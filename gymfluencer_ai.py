@@ -749,13 +749,19 @@ async def submit_fitness_info(request: Request):
 
         # Make an internal HTTP call to /save-workout-plan
     async with httpx.AsyncClient() as client:
-        response = await client.post("https://gym.birlaventures.com/api/save-workout-plan", json=payload)
+        try:
+            response = await client.post("https://gym.birlaventures.com/api/save-workout-plan", json=payload)
+            response.raise_for_status()  # Raise an error for non-2xx HTTP status codes
+                
+                # Attempt to parse the response JSON
+            try:
+                    save_message = response.json().get("message", "Save operation successful")
+            except ValueError:
+                    save_message = "Invalid JSON response from /save-workout-plan"
+        
+        except httpx.HTTPError as e:
+                save_message = f"Failed to save workout plan: {str(e)}"
 
-     # Parse response from /save-workout-plan
-    if response.status_code == 200:
-        save_message = response.json().get("message")
-    else:
-        save_message = response.json().get("error", "Unknown error")
     
     return JSONResponse(content={"message": "Fitness information submitted successfully!","workout_plan": workout_plan, "save_status": save_message})
 
