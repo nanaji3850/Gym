@@ -749,7 +749,7 @@ async def submit_fitness_info(request: Request):
 
         # Make an internal HTTP call to /save-workout-plan
     async with httpx.AsyncClient() as client:
-        response = await client.post("https://gym.birlaventures.com/save-workout-plan", json=payload)
+        response = await client.post("https://gym.birlaventures.com/api/save-workout-plan", json=payload)
 
      # Parse response from /save-workout-plan
     if response.status_code == 200:
@@ -774,7 +774,7 @@ async def submit_diet_info(request: Request):
 
         # Make an internal HTTP call to /save-workout-plan
     async with httpx.AsyncClient() as client:
-        response = await client.post("https://gym.birlaventures.com/save-diet-plan", json=payload)
+        response = await client.post("https://gym.birlaventures.com/api/save-diet-plan", json=payload)
 
      # Parse response from /save-workout-plan
     if response.status_code == 200:
