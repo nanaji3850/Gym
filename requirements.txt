@@ -11,4 +11,4 @@ jwt
 passlib
 pymongo
 bcrypt
-pyjwt
+pyjwt==2.6.0
