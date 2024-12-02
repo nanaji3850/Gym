@@ -7,8 +7,7 @@ openai==0.28.0
 python-dotenv
 python-multipart
 httpx
-jwt
+PyJWT==2.6.0
 passlib
 pymongo
 bcrypt
-pyjwt==2.6.0
