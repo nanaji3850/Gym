@@ -15,4 +15,6 @@ EXPOSE 8000
 
 COPY gymfluencer_ai.py .
 
+COPY .env .
+
 CMD ["uvicorn", "gymfluencer_ai:app", "--host", "0.0.0.0", "--port", "8000"]
