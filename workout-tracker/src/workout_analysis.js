@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Layout from "./Layout";
 import WorkoutTracker from "./LiveCamera";
+import axios from "axios"; // Import axios for progress tracking
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -14,7 +15,6 @@ import {
 } from "chart.js";
 import BarChart from "./BarChart";
 import PieChart from "./PieChart";
-// import WorkoutTracker from "./WorkoutTracker";
 
 function WorkoutAnalysis() {
   const [file, setFile] = useState(null);
@@ -35,14 +35,14 @@ function WorkoutAnalysis() {
   const frameInterval = useRef(null); // Reference for frame sending interval
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0); // Upload progress state
   const workoutControlRef = useRef(null); // Declare the reference
-
-  // const [workoutTrackerData, setWorkoutTrackerData] = useState(null); // Dynamic state for WorkoutTracker
 
   const username = localStorage.getItem("username");
   const userId = localStorage.getItem("username");
 
-  ChartJS.register(
+   // Register chart.js components
+   ChartJS.register(
     CategoryScale,
     LinearScale,
     BarElement,
@@ -51,10 +51,9 @@ function WorkoutAnalysis() {
     Legend,
     ArcElement // For Pie Charts
   );
+
   useEffect(() => {
-    fetch(
-      `https://gym.birlaventures.com/api/get-aggregated-data?user_id=${userId}`
-    ) // Replace with your actual API
+    fetch(`https://gym.birlaventures.com/api/get-aggregated-data?user_id=${userId}`) // Replace with your actual API
       .then((res) => res.json())
       .then((response) => {
         setData(response.data);
@@ -90,7 +89,6 @@ function WorkoutAnalysis() {
           const data = JSON.parse(event.data);
           console.log("Data received from WebSocket:", data);
           if (data.hasOwnProperty("frame")) {
-            // console.log("Frame received from WebSocket");
             setFrame(`data:image/jpeg;base64,${data.frame}`);
           } else if (data.hasOwnProperty("summary")) {
             setSummary(data.summary);
@@ -108,79 +106,32 @@ function WorkoutAnalysis() {
     };
   }, []);
 
-  // // Start video stream using camera
-  // const startVideoStream = async () => {
-  //   try {
-  //     mediaStream.current = await navigator.mediaDevices.getUserMedia({
-  //       video: true,
-  //     });
-  //     videoRef.current.srcObject = mediaStream.current;
-  //   } catch (err) {
-  //     console.error("Error accessing camera:", err);
-  //   }
-  // };
-
-  // // Stop video stream
-  // const stopVideoStream = () => {
-  //   if (mediaStream.current) {
-  //     mediaStream.current.getTracks().forEach((track) => track.stop());
-  //     mediaStream.current = null;
-  //   }
-  // };
-
-  // const sendVideoFrame = () => {
-  //   if (socket.readyState !== WebSocket.OPEN) {
-  //     console.log(
-  //       "Cannot send frame: Workout not running or WebSocket not open."
-  //     );
-  //     return;
-  //   }
-
-  //   const canvas = document.createElement("canvas");
-  //   const video = videoRef.current;
-  //   canvas.width = video.videoWidth;
-  //   canvas.height = video.videoHeight;
-  //   const ctx = canvas.getContext("2d");
-  //   ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-  //   const frameData = canvas.toDataURL("image/jpeg");
-
-  //   console.log("Sending frame to backend...");
-
-  //   socket.send(
-  //     JSON.stringify({
-  //       action: "video_frame",
-  //       frame: frameData.split(",")[1],
-  //       workout_type: workoutType,
-  //       body_weight: parseFloat(bodyWeight),
-  //       username: username,
-  //     })
-  //   );
-  //   // console.log("Message sent to WebSocket:", frameData);
-  // };
-
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     setFile(selectedFile);
-    uploadFile(selectedFile);
+    setUploadProgress(0); // Reset progress on file selection
   };
 
-  const uploadFile = (file) => {
+  const uploadFile = async (file) => {
     const formData = new FormData();
     formData.append("file", file);
 
-    return fetch("https://gym.birlaventures.com/api/upload", {
-      method: "POST",
-      body: formData,
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("File uploaded successfully");
-        return data.filename;
-      })
-      .catch((error) => {
-        console.error("Error uploading file:", error);
-        return null;
+    try {
+      const response = await axios.post("https://gym.birlaventures.com/api/upload", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+        onUploadProgress: (progressEvent) => {
+          if (progressEvent.total) {
+            const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            setUploadProgress(percent); // Update upload progress
+          }
+        },
       });
+      console.log("File uploaded successfully");
+      return response.data.filename; // Assuming filename is returned in the response
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      return null;
+    }
   };
 
   const handleUpload = async () => {
@@ -225,17 +176,14 @@ function WorkoutAnalysis() {
     setSource(e.target.value);
     setFile(null);
     setError("");
+    setUploadProgress(0); // Reset upload progress when source changes
   };
 
   const handleStopWorkout = () => {
     if (source === "0") {
-      console.log("Source is 0. Stopping workout via workoutControlRef.");
       workoutControlRef.current?.stopWorkout(); // Trigger stopWorkout when source is 0
     } else if (source === "file") {
       if (socket && socket.readyState === WebSocket.OPEN) {
-        console.log(
-          "Source is file. Sending stop_workout action to backend..."
-        );
         socket.send(
           JSON.stringify({
             action: "stop_workout",
@@ -244,18 +192,14 @@ function WorkoutAnalysis() {
           })
         );
       } else {
-        console.error(
-          "WebSocket is not open. Unable to send stop_workout action."
-        );
+        console.error("WebSocket is not open. Unable to send stop_workout action.");
       }
-    } else {
-      console.warn("Unknown source. No action performed.");
     }
   };
+
   return (
-    <>
-      <Layout>
-        <div className="hero-section2 bg-cover bg-center h-screen flex flex-col items-center justify-center text-white text-center pt-16">
+    <Layout>
+       <div className="hero-section2 bg-cover bg-center h-screen flex flex-col items-center justify-center text-white text-center pt-16">
           <h1 className="text-4xl md:text-5xl font-bold">
             Track Your Fitness Journey
           </h1>
@@ -266,98 +210,113 @@ function WorkoutAnalysis() {
             interface.
           </p>
         </div>
+      <section className="flex flex-col items-center w-full p-8 mt-20">
+        {/* Workout Tracker Section */}
+        <div className="bg-blue-50 p-10 rounded-lg shadow-lg w-full max-w-2xl mb-12">
+          <h2 className="text-3xl font-semibold mb-6">Workout Tracker</h2>
 
-        <section className="flex flex-col items-center w-full p-8 mt-20">
-          {/* Workout Tracker Section */}
-          <div className="bg-blue-50 p-10 rounded-lg shadow-lg w-full max-w-2xl mb-12">
-            <h2 className="text-3xl font-semibold mb-6">Workout Tracker</h2>
-
-            <div className="mb-4">
-              <label className="text-lg">Enter Body Weight (kg):</label>
-              <input
-                type="number"
-                value={bodyWeight}
-                onChange={(e) => setBodyWeight(e.target.value)}
-                className="border rounded p-2 w-full mb-5 text-lg"
-              />
-            </div>
-
-            {/* Source Options */}
-            <div className="flex justify-around mb-4">
-              <label className="flex items-center text-lg">
-                <input
-                  type="radio"
-                  value="file"
-                  checked={source === "file"}
-                  onChange={handleSourceChange}
-                  className="mr-2"
-                />
-                Upload a Recorded Video
-              </label>
-              <label className="flex items-center text-lg">
-                <input
-                  type="radio"
-                  value="0"
-                  checked={source === "0"}
-                  onChange={handleSourceChange}
-                  className="mr-2"
-                />
-                Use Live Camera
-              </label>
-            </div>
-
-            {/* File Input for Video Upload */}
-            {source === "file" && (
-              <input
-                type="file"
-                onChange={handleFileChange}
-                className="border rounded p-3 w-full mb-5 text-lg"
-              />
-            )}
-
-            {error && <p className="text-red-500 text-lg">{error}</p>}
-
-            {/* Start and Stop Workout Buttons */}
-            <button
-              className="bg-gray-800 text-white rounded p-3 w-full mb-3 text-lg hover:bg-gray-700"
-              onClick={handleUpload}
-            >
-              Start Workout
-            </button>
-            <button
-              onClick={handleStopWorkout}
-              className="bg-gray-800 text-white rounded p-3 w-full mb-3 text-lg hover:bg-gray-700"
-            >
-              Stop Workout
-            </button>
-
-            {loading && (
-              <div className="loading-spinner">Processing your workout...</div>
-            )}
-
-            {/* Display Video Frame */}
-            {frame && !loading && (
-              <div className="mt-6">
-                <img
-                  src={frame}
-                  alt="Workout Frame"
-                  className="rounded-lg shadow-md w-full"
-                />
-              </div>
-            )}
+          <div className="mb-4">
+            <label className="text-lg">Enter Body Weight (kg):</label>
+            <input
+              type="number"
+              value={bodyWeight}
+              onChange={(e) => setBodyWeight(e.target.value)}
+              className="border rounded p-2 w-full mb-5 text-lg"
+            />
           </div>
-          {/* Conditionally Render WorkoutTracker Component */}
-          {source === "0" && (
-            <WorkoutTracker
-              onWorkoutControl={(control) => {
-                workoutControlRef.current = control;
-                setLoading(false);
-              }}
+
+          {/* Source Options */}
+          <div className="flex justify-around mb-4">
+            <label className="flex items-center text-lg">
+              <input
+                type="radio"
+                value="file"
+                checked={source === "file"}
+                onChange={handleSourceChange}
+                className="mr-2"
+              />
+              Upload a Recorded Video
+            </label>
+            <label className="flex items-center text-lg">
+              <input
+                type="radio"
+                value="0"
+                checked={source === "0"}
+                onChange={handleSourceChange}
+                className="mr-2"
+              />
+              Use Live Camera
+            </label>
+          </div>
+
+          {/* File Input for Video Upload */}
+          {source === "file" && (
+            <input
+              type="file"
+              onChange={handleFileChange}
+              className="border rounded p-3 w-full mb-5 text-lg"
+              accept="video/*" // Restrict to video files only
             />
           )}
 
-          {/* Workout Summary Section */}
-          {summary && Object.keys(summary).length > 0 ? (
+          {error && <p className="text-red-500 text-lg">{error}</p>}
+
+          {/* Upload Progress */}
+          {uploadProgress > 0 && uploadProgress < 100 && (
+            <div className="mb-4">
+              <p>Uploading... {uploadProgress}%</p>
+              <div className="bg-gray-200 rounded-full h-2 w-full">
+                <div
+                  className="bg-blue-600 h-2 rounded-full"
+                  style={{ width: `${uploadProgress}%` }}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Start and Stop Workout Buttons */}
+          <button
+            className="bg-gray-800 text-white rounded p-3 w-full mb-3 text-lg hover:bg-gray-700"
+            onClick={handleUpload}
+            disabled={uploadProgress > 0 && uploadProgress < 100} // Disable while uploading
+          >
+            {uploadProgress > 0 && uploadProgress < 100 ? "Uploading..." : "Start Workout"}
+          </button>
+          <button
+            onClick={handleStopWorkout}
+            className="bg-gray-800 text-white rounded p-3 w-full mb-3 text-lg hover:bg-gray-700"
+          >
+            Stop Workout
+          </button>
+
+          {loading && (
+            <div className="loading-spinner">Processing your workout...</div>
+          )}
+
+          {/* Display Video Frame */}
+          {frame && !loading && (
+            <div className="mt-6">
+              <img
+                src={frame}
+                alt="Workout Frame"
+                className="rounded-lg shadow-md w-full"
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Conditionally Render WorkoutTracker Component */}
+        {source === "0" && (
+          <WorkoutTracker
+            onWorkoutControl={(control) => {
+              workoutControlRef.current = control;
+              setLoading(false);
+            }}
+          />
+        )}
+
+         {/* Workout Summary Section */}
+         {summary && Object.keys(summary).length > 0 ? (
             <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md mb-8 mx-auto text-center">
               <h2 className="text-2xl font-semibold mb-6">Workout Summary</h2>
               {Object.keys(summary).map((workout) => (
@@ -389,9 +348,8 @@ function WorkoutAnalysis() {
               </p>
             </div>
           )}
-        </section>
-
-        <div className="min-h-screen bg-gray-100 flex flex-col items-center gap-8 p-4">
+      </section>
+      <div className="min-h-screen bg-gray-100 flex flex-col items-center gap-8 p-4">
           {loading ? (
             <div className="text-gray-700 text-lg">Loading...</div>
           ) : (
@@ -405,7 +363,6 @@ function WorkoutAnalysis() {
             </>
           )}
         </div>
-
         <section className="flex flex-wrap justify-center items-center gap-6 w-full p-8 bg-gray-50">
           <h2 className="text-4xl font-semibold mb-6 w-full text-center">
             Diet Plan
@@ -496,8 +453,7 @@ function WorkoutAnalysis() {
         <footer className="bg-gray-800 text-white text-center py-4">
           <p>&copy; 2024 GymFluencer. All rights reserved.</p>
         </footer>
-      </Layout>
-    </>
+    </Layout>
   );
 }
 
