@@ -35,7 +35,8 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 
 app = FastAPI()
 # socket_manager = SocketManager(app)
-
+# List to store connected WebSocket clients
+connected_clients = []
 # Password hashing setup
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -805,11 +806,61 @@ async def upload_file(file: UploadFile = File(...)):
         return JSONResponse(content={"filename": file.filename})
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+class WorkoutData(BaseModel):
+    username: str
+    workoutType: str
+    reps: int
+    caloriesBurned: float
+    repsData: str
+    
+@app.post("/api/workout-data")
+async def receive_workout_data(data: WorkoutData):
+    try:
+        # Log or process the incoming data
+        # print("Received data:", data)
+        reps = data.reps
+        caloriesBurned = data.caloriesBurned
+        reps_data = data.repsData
+        workout_type = data.workoutType
+        print(f"Reps: {reps}")
+        print(f"Calories Burned: {caloriesBurned}")
+        print(f"Reps Data: {reps_data}")
+
+        user_id = data.username  
+        payload = {"user_id": user_id, "workout_type":workout_type,"reps":reps, "calories_burned":caloriesBurned}
+        
+        # Make an internal HTTP call to /save-workout-plan
+        async with httpx.AsyncClient() as client:
+            response = await client.post("https://gym.birlaventures.com/api/save-workout", json=payload)
+
+        # Process internal call response
+        if response.status_code != 200:
+            raise HTTPException(status_code=500, detail="Failed to save workout data")
+
+        # Generate summary and feedback
+        summary = {workout_type: {"reps": reps,"calories": float(caloriesBurned)}}
+        feedback = generate_workout_feedback(workout_type, reps_data)
+        # Broadcast summary and feedback to all connected WebSocket clients
+        for client in connected_clients:
+            try:
+                await client.send_json({"summary": summary})
+                await client.send_json({"feedback": feedback})
+            except Exception as e:
+                print(f"Error sending data to client: {e}")
+        # print("summary:", summary)
+        # print("feedback:", feedback)
+
+
+        return {"message": "Workout data received successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     global workout_task,stop_workout_flag
     await websocket.accept()
+    connected_clients.append(websocket)
     while True:
         try:
             data = await websocket.receive_json()
@@ -818,27 +869,19 @@ async def websocket_endpoint(websocket: WebSocket):
             username=data.get("username")
             print(f"Received action: {action}")
             
-
-            if action == "start_workout":
-                
+            if action == "start_workout": 
                 # Launch `handle_start_workout` as a background task
                 stop_workout_flag = False  # Reset the stop flag
                 workout_task = asyncio.create_task(handle_start_workout(websocket, data))
 
-            elif action == "video_frame":
-                # if stop_workout_flag:
-                #     # Ignore frames if the workout is stopped
-                #     continue
-                await handle_video_frame(websocket)
 
-            elif action == "stop_workout":
-                
-                
+            elif action == "stop_workout":  
                 await handle_stop_workout(websocket,workout_type,username)  # Stop the workout immediately
 
         except WebSocketDisconnect:
             print("Client disconnected")
-            break
+        finally:
+            connected_clients.remove(websocket)  # Remove the WebSocket from the list
 
         
 
@@ -1045,89 +1088,6 @@ async def handle_stop_workout(websocket: WebSocket,workout_type,username):
     reps_data=""
     
     await websocket.send_json({"message": "Workout stopped"})
-
-    
-    # @app.websocket("/ws/video_frame")
-async def handle_video_frame(websocket: WebSocket):
-    
-    try:
-        while True:
-
-            # Receive frame data from the client
-            data = await websocket.receive_json()
-            
-            frame_data = base64.b64decode(data['frame'])
-            np_arr = np.frombuffer(frame_data, np.uint8)
-            frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
-
-            workout_type = data['workout_type']
-            body_weight = data['body_weight']
-
-            # Process the frame
-            processed_frame = await process_frame(websocket,frame, workout_type, body_weight)
-
-            
-    except WebSocketDisconnect:
-        print("Client disconnected")
-    except Exception as e:
-        print(f"Error: {e}")
-
-
-
-async def process_frame(websocket: WebSocket,frame, workout_type, body_weight):
-    
-    # Example processing code
-    image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    image.flags.writeable = False
-
-    # Process the image and get pose landmarks
-    results = pose.process(image)
-
-    # Convert the image back to BGR for OpenCV
-    image.flags.writeable = True
-    image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-
-    # Draw the pose annotations on the image
-    if results.pose_landmarks:
-        mp_drawing.draw_landmarks(
-            image, 
-            results.pose_landmarks, 
-            mp_pose.POSE_CONNECTIONS,
-            landmark_drawing_spec=landmark_style,
-            connection_drawing_spec=connection_style
-        )
-
-        # Count repetitions and calories
-        count_reps(results.pose_landmarks, workout_type, body_weight)
-        
-
-        # Display workout details
-        cv2.putText(image, f'Workout: {workout_type}', (10, 30), 
-                    cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
-        cv2.putText(image, f'Reps: {rep_count[workout_type]}', (10, 60), 
-                    cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
-        cv2.putText(image, f'Calories: {calories_burned[workout_type]:.2f}', (10, 90), 
-                    cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
-        # cv2.imshow('Workout Counter', image)
-        _, buffer = cv2.imencode('.jpg', image)
-        frame_data = base64.b64encode(buffer).decode('utf-8')
-        # logging.info(f"Sending frame data to the client: {len(frame_data)} bytes")
-            # Send the processed frame back to the client
-
-        await websocket.send_json({'frame': frame_data})
-    
-     # Generate and send a summary
-    summary = {
-        workout_type: {
-            "reps": rep_count[workout_type],
-            "calories": calories_burned[workout_type]
-        }
-     }
-    
-    # logging.info(f"Sending summary data: {summary}")
-    await websocket.send_json({"summary": summary})
-    return image
-
 
 
 if __name__ == "__main__":

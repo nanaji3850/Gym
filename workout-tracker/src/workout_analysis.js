@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Layout from "./Layout";
+import WorkoutTracker from "./LiveCamera";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -34,6 +35,7 @@ function WorkoutAnalysis() {
   const frameInterval = useRef(null); // Reference for frame sending interval
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
+  const workoutControlRef = useRef(null); // Declare the reference
 
   // const [workoutTrackerData, setWorkoutTrackerData] = useState(null); // Dynamic state for WorkoutTracker
 
@@ -106,55 +108,55 @@ function WorkoutAnalysis() {
     };
   }, []);
 
-  // Start video stream using camera
-  const startVideoStream = async () => {
-    try {
-      mediaStream.current = await navigator.mediaDevices.getUserMedia({
-        video: true,
-      });
-      videoRef.current.srcObject = mediaStream.current;
-    } catch (err) {
-      console.error("Error accessing camera:", err);
-    }
-  };
+  // // Start video stream using camera
+  // const startVideoStream = async () => {
+  //   try {
+  //     mediaStream.current = await navigator.mediaDevices.getUserMedia({
+  //       video: true,
+  //     });
+  //     videoRef.current.srcObject = mediaStream.current;
+  //   } catch (err) {
+  //     console.error("Error accessing camera:", err);
+  //   }
+  // };
 
-  // Stop video stream
-  const stopVideoStream = () => {
-    if (mediaStream.current) {
-      mediaStream.current.getTracks().forEach((track) => track.stop());
-      mediaStream.current = null;
-    }
-  };
+  // // Stop video stream
+  // const stopVideoStream = () => {
+  //   if (mediaStream.current) {
+  //     mediaStream.current.getTracks().forEach((track) => track.stop());
+  //     mediaStream.current = null;
+  //   }
+  // };
 
-  const sendVideoFrame = () => {
-    if (socket.readyState !== WebSocket.OPEN) {
-      console.log(
-        "Cannot send frame: Workout not running or WebSocket not open."
-      );
-      return;
-    }
+  // const sendVideoFrame = () => {
+  //   if (socket.readyState !== WebSocket.OPEN) {
+  //     console.log(
+  //       "Cannot send frame: Workout not running or WebSocket not open."
+  //     );
+  //     return;
+  //   }
 
-    const canvas = document.createElement("canvas");
-    const video = videoRef.current;
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    const ctx = canvas.getContext("2d");
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    const frameData = canvas.toDataURL("image/jpeg");
+  //   const canvas = document.createElement("canvas");
+  //   const video = videoRef.current;
+  //   canvas.width = video.videoWidth;
+  //   canvas.height = video.videoHeight;
+  //   const ctx = canvas.getContext("2d");
+  //   ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  //   const frameData = canvas.toDataURL("image/jpeg");
 
-    console.log("Sending frame to backend...");
+  //   console.log("Sending frame to backend...");
 
-    socket.send(
-      JSON.stringify({
-        action: "video_frame",
-        frame: frameData.split(",")[1],
-        workout_type: workoutType,
-        body_weight: parseFloat(bodyWeight),
-        username: username,
-      })
-    );
-    // console.log("Message sent to WebSocket:", frameData);
-  };
+  //   socket.send(
+  //     JSON.stringify({
+  //       action: "video_frame",
+  //       frame: frameData.split(",")[1],
+  //       workout_type: workoutType,
+  //       body_weight: parseFloat(bodyWeight),
+  //       username: username,
+  //     })
+  //   );
+  //   // console.log("Message sent to WebSocket:", frameData);
+  // };
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -211,10 +213,11 @@ function WorkoutAnalysis() {
         console.error("File upload failed; workout not started.");
       }
     } else if (source === "0") {
-      startVideoStream();
-      setIsWorkoutRunning(true);
-      console.log("Workout started.");
-      frameInterval.current = setInterval(sendVideoFrame, 100); // Send 10 frames per second
+      workoutControlRef.current?.startWorkout(
+        workoutType,
+        parsedBodyWeight,
+        username
+      );
     }
   };
 
@@ -225,23 +228,28 @@ function WorkoutAnalysis() {
   };
 
   const handleStopWorkout = () => {
-    setIsWorkoutRunning(false);
-
-    clearInterval(frameInterval.current);
-    stopVideoStream();
-    if (socket && socket.readyState === WebSocket.OPEN) {
-      console.log("Sending stop_workout action to backend...");
-      socket.send(
-        JSON.stringify({
-          action: "stop_workout",
-          workout_type: workoutType,
-          username: username,
-        })
-      );
+    if (source === "0") {
+      console.log("Source is 0. Stopping workout via workoutControlRef.");
+      workoutControlRef.current?.stopWorkout(); // Trigger stopWorkout when source is 0
+    } else if (source === "file") {
+      if (socket && socket.readyState === WebSocket.OPEN) {
+        console.log(
+          "Source is file. Sending stop_workout action to backend..."
+        );
+        socket.send(
+          JSON.stringify({
+            action: "stop_workout",
+            workout_type: workoutType,
+            username: username,
+          })
+        );
+      } else {
+        console.error(
+          "WebSocket is not open. Unable to send stop_workout action."
+        );
+      }
     } else {
-      console.error(
-        "WebSocket is not open. Unable to send stop_workout action."
-      );
+      console.warn("Unknown source. No action performed.");
     }
   };
   return (
@@ -306,16 +314,6 @@ function WorkoutAnalysis() {
                 className="border rounded p-3 w-full mb-5 text-lg"
               />
             )}
-            {source === "0" && (
-              <div>
-                <video
-                  ref={videoRef}
-                  autoPlay
-                  muted
-                  className="w-full h-64 rounded-lg mb-5"
-                />
-              </div>
-            )}
 
             {error && <p className="text-red-500 text-lg">{error}</p>}
 
@@ -343,22 +341,20 @@ function WorkoutAnalysis() {
                 <img
                   src={frame}
                   alt="Workout Frame"
-                  className={`rounded-lg shadow-md ${
-                    source === 0
-                      ? "w-screen h-auto max-h-screen object-contain"
-                      : "w-full"
-                  }`}
+                  className="rounded-lg shadow-md w-full"
                 />
               </div>
             )}
           </div>
-          {/* Workout Tracker */}
-          {/* {workoutTrackerData && (
-          <WorkoutTracker
-            action={workoutTrackerData.action}
-            workoutType={workoutTrackerData.workoutType}
-          />
-        )} */}
+          {/* Conditionally Render WorkoutTracker Component */}
+          {source === "0" && (
+            <WorkoutTracker
+              onWorkoutControl={(control) => {
+                workoutControlRef.current = control;
+                setLoading(false);
+              }}
+            />
+          )}
 
           {/* Workout Summary Section */}
           {summary && Object.keys(summary).length > 0 ? (
