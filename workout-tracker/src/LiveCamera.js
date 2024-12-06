@@ -353,7 +353,7 @@ const WorkoutTracker = ({ onWorkoutControl }) => {
 
     if (results.poseLandmarks) {
       console.log("Received pose landmarks:", results.poseLandmarks);
-      drawConnectors(canvasCtx, results.poseLandmarks, Pose.POSE_CONNECTIONS, {
+      drawConnectors(canvasCtx, results.poseLandmarks, POSE_CONNECTIONS, {
         color: "#00FF00",
         lineWidth: 4,
       });

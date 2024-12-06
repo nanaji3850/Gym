@@ -858,30 +858,46 @@ async def receive_workout_data(data: WorkoutData):
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
-    global workout_task,stop_workout_flag
+    global workout_task, stop_workout_flag
     await websocket.accept()
-    connected_clients.append(websocket)
-    while True:
-        try:
-            data = await websocket.receive_json()
-            action = data.get("action")
-            workout_type=data.get("workout_type")
-            username=data.get("username")
-            print(f"Received action: {action}")
+    connected_clients.append(websocket)  # Add the WebSocket to the list
+
+    try:
+        while True:
+            try:
+                data = await websocket.receive_json()
+                action = data.get("action")
+                workout_type = data.get("workout_type")
+                username = data.get("username")
+                print(f"Received action: {action}")
+
+                if action == "start_workout":
+                    # Launch `handle_start_workout` as a background task
+                    stop_workout_flag = False  # Reset the stop flag
+                    workout_task = asyncio.create_task(
+                        handle_start_workout(websocket, data)
+                    )
+
+                elif action == "stop_workout":
+                    await handle_stop_workout(websocket, workout_type, username)
+
+            except WebSocketDisconnect:
+                print("Client disconnected")
+                break  # Exit the loop when the client disconnects
+
+            except RuntimeError as e:
+                print(f"RuntimeError: {e}")
+                break  # Exit the loop on runtime errors
             
-            if action == "start_workout": 
-                # Launch `handle_start_workout` as a background task
-                stop_workout_flag = False  # Reset the stop flag
-                workout_task = asyncio.create_task(handle_start_workout(websocket, data))
-
-
-            elif action == "stop_workout":  
-                await handle_stop_workout(websocket,workout_type,username)  # Stop the workout immediately
-
-        except WebSocketDisconnect:
-            print("Client disconnected")
-        finally:
-            connected_clients.remove(websocket)  # Remove the WebSocket from the list
+            except Exception as e:
+                print(f"Unexpected error: {e}")
+                # Optionally send an error response to the client
+                await websocket.send_json({"error": str(e)})
+    finally:
+        # Ensure the WebSocket is removed even in case of an error or disconnect
+        if websocket in connected_clients:
+            connected_clients.remove(websocket)
+        print("WebSocket connection removed.")
 
         
 
