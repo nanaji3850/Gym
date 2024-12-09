@@ -18,6 +18,8 @@ const WorkoutTracker = ({ onWorkoutControl }) => {
   const workoutTypeRef = useRef("");
   const [BodyWeight, setBodyWeight] = useState("");
   const BodyWeightRef = useRef("");
+  const [dumbbellWeight, setDumbbellWeight] = useState("");
+  const dumbbellWeightRef = useRef("");
   const canvasRef = useRef(null);
   const [reps, setReps] = useState(0);
   const [isRunning, setIsRunning] = useState(true);
@@ -82,6 +84,11 @@ const WorkoutTracker = ({ onWorkoutControl }) => {
     BodyWeightRef.current = BodyWeight;
     console.log("BodyWeight updated in ref:", BodyWeightRef.current);
   }, [BodyWeight]);
+
+  useEffect(() => {
+    dumbbellWeightRef.current = dumbbellWeight;
+    console.log("BodyWeight updated in ref:", dumbbellWeightRef.current);
+  }, [dumbbellWeight]);
 
   //   useEffect(() => {
   //     if (workoutType) {
@@ -276,8 +283,23 @@ const WorkoutTracker = ({ onWorkoutControl }) => {
       const newReps = prev + 1;
       console.log("Rep counted. Total reps:", newReps);
       // Calculate calories burned
-      const calories =
-        CALORIES_PER_REP[workoutTypeRef.current] * (BodyWeightRef.current / 70);
+      let calories;
+      if (
+        workoutTypeRef.current === "Bicep Curls" ||
+        workoutTypeRef.current === "Deadlifts"
+      ) {
+        // Calculate calories for Bicep Curls with dumbbell weight
+        const baseCalories =
+          CALORIES_PER_REP[workoutTypeRef.current] *
+          (BodyWeightRef.current / 70);
+        const weightMultiplier = 1 + dumbbellWeightRef.current / 10; // Adjust multiplier based on dumbbell weight
+        calories = baseCalories * weightMultiplier;
+      } else {
+        // Normal calorie calculation for other workouts
+        calories =
+          CALORIES_PER_REP[workoutTypeRef.current] *
+          (BodyWeightRef.current / 70);
+      }
       setCaloriesBurned((prev) => prev + calories);
 
       // Add rep data
@@ -405,9 +427,10 @@ const WorkoutTracker = ({ onWorkoutControl }) => {
     }
   }, []);
 
-  const startWorkout = (type, weight) => {
+  const startWorkout = (type, weight, dumbbellWeight) => {
     setWorkoutType(type);
     setBodyWeight(weight);
+    setDumbbellWeight(dumbbellWeight);
     setReps(0);
     setCaloriesBurned(0);
     setRepsData("");
