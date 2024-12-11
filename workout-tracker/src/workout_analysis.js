@@ -149,6 +149,7 @@ function WorkoutAnalysis() {
       return;
     }
     const parsedBodyWeight = parseFloat(bodyWeight);
+    const parseddumbbellWeight = parseFloat(dumbbellWeight);
     setLoading(true); // Start loading when the workout begins
 
     if (source === "file") {
@@ -167,6 +168,7 @@ function WorkoutAnalysis() {
             workout_type: workoutType,
             body_weight: parsedBodyWeight,
             username: username,
+            dumbbellWeight: parseddumbbellWeight,
           })
         );
       } else {
@@ -176,7 +178,7 @@ function WorkoutAnalysis() {
       workoutControlRef.current?.startWorkout(
         workoutType,
         parsedBodyWeight,
-        dumbbellWeight,
+        parseddumbbellWeight,
         username
       );
     }

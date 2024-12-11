@@ -371,7 +371,7 @@ def calculate_angle(a, b, c):
         angle = 360 - angle
     return angle
 
-def count_reps(landmarks, workout_type, body_weight):
+def count_reps(landmarks, workout_type, body_weight,dumbbellWeight):
     global rep_count, stage, calories_burned, top_angle, reps_data, down_angle
     
     if workout_type == 'Push-ups':
@@ -507,7 +507,7 @@ def count_reps(landmarks, workout_type, body_weight):
         elif angle < 145 and stage == 'down':
             rep_count[workout_type] += 1
             stage = "up"
-            calories_burned[workout_type] += CALORIES_PER_REP[workout_type] * (body_weight / 70)
+            calories_burned[workout_type] += CALORIES_PER_REP[workout_type] * (body_weight / 70) * (1 + (dumbbellWeight / 10))
 
             print(f"Rep: {rep_count[workout_type]}, Angle (down): {down_angle}, Angle (up): {angle}")
 
@@ -543,7 +543,7 @@ def count_reps(landmarks, workout_type, body_weight):
         elif angle < 40 and stage == 'down':
             rep_count[workout_type] += 1
             stage = "up"
-            calories_burned[workout_type] += CALORIES_PER_REP[workout_type] * (body_weight / 70)
+            calories_burned[workout_type] += CALORIES_PER_REP[workout_type] * (body_weight / 70) * (1 + (dumbbellWeight / 10))
 
             print(f"Rep: {rep_count[workout_type]}, Angle (down): {down_angle}, Angle(up): {angle}")
 
@@ -948,21 +948,19 @@ async def handle_start_workout(websocket: WebSocket, data: dict):
         source = data.get('source')
         workout_type = data.get('workout_type')
         body_weight = data.get('body_weight')
-
+        dumbbellWeight = data.get('dumbbellWeight')
         
-        if source == "0":
-            cap = cv2.VideoCapture(0)
-        else:
-            filename = data.get('filename')
-            file_path = f'./uploads/{filename}'
-            print(f"File path for uploaded video: {file_path}")
+       
+        filename = data.get('filename')
+        file_path = f'./uploads/{filename}'
+        print(f"File path for uploaded video: {file_path}")
 
-            if not os.path.exists(file_path):
-                print(f"Error: File {file_path} not found.")
-                websocket.send_json({'message': 'File not found'})
-                return
+        if not os.path.exists(file_path):
+            print(f"Error: File {file_path} not found.")
+            websocket.send_json({'message': 'File not found'})
+            return
 
-            cap = cv2.VideoCapture(file_path)
+        cap = cv2.VideoCapture(file_path)
         previous_frame = None
         frame_count = 0
 
@@ -1010,7 +1008,7 @@ async def handle_start_workout(websocket: WebSocket, data: dict):
 
             if results.pose_landmarks:
                 mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_pose.POSE_CONNECTIONS, landmark_drawing_spec=landmark_style, connection_drawing_spec=connection_style)
-                count_reps(results.pose_landmarks, workout_type, body_weight)
+                count_reps(results.pose_landmarks, workout_type, body_weight,dumbbellWeight)
 
             cv2.putText(image, f'Workout: {workout_type}', (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
             cv2.putText(image, f'Reps:{rep_count[workout_type]}', (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
@@ -1019,7 +1017,6 @@ async def handle_start_workout(websocket: WebSocket, data: dict):
             _, buffer = cv2.imencode('.jpg', image)
             frame_data = buffer.tobytes()
             await websocket.send_bytes(frame_data)
-
             # # Brief pause to allow control flow back to event loop
             # # await asyncio.sleep(0.05)
 
