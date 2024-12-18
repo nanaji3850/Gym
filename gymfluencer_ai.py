@@ -370,151 +370,145 @@ def calculate_angle(a, b, c):
     if angle > 180.0:
         angle = 360 - angle
     return angle
+angle_buffer = {"left": [], "right": [], "left_leg": [], "right_leg": []}
+SMOOTHING_WINDOW = 5  # Number of frames for smoothing
 
-def count_reps(landmarks, workout_type, body_weight,dumbbellWeight):
-    global rep_count, stage, calories_burned, top_angle, reps_data, down_angle
-    
+def smooth_angle(new_angle, buffer):
+    buffer.append(new_angle)
+    if len(buffer) > SMOOTHING_WINDOW:
+        buffer.pop(0)
+    return sum(buffer) / len(buffer)
+
+def count_reps(landmarks, workout_type, body_weight,dumbbellWeight=0):
+    global rep_count, stage, calories_burned, top_angle, reps_data, angle_buffer, down_angle
+
+    def calculate_joint_angles(joint1, joint2, joint3, buffer_key):
+        angle = calculate_angle(joint1, joint2, joint3)
+        return smooth_angle(angle, angle_buffer[buffer_key])
+
     if workout_type == 'Push-ups':
-        left_wrist = landmarks.landmark[mp_pose.PoseLandmark.LEFT_WRIST]
-        left_elbow = landmarks.landmark[mp_pose.PoseLandmark.LEFT_ELBOW]
-        left_shoulder = landmarks.landmark[mp_pose.PoseLandmark.LEFT_SHOULDER]
-        
-        wrist = [left_wrist.x, left_wrist.y]
-        elbow = [left_elbow.x, left_elbow.y]
-        shoulder = [left_shoulder.x, left_shoulder.y]
-        
-        left_angle = calculate_angle(wrist, elbow, shoulder)
-
-        right_wrist = landmarks.landmark[mp_pose.PoseLandmark.RIGHT_WRIST]
-        right_elbow = landmarks.landmark[mp_pose.PoseLandmark.RIGHT_ELBOW]
-        right_shoulder = landmarks.landmark[mp_pose.PoseLandmark.RIGHT_SHOULDER]
-        
-        wrist = [right_wrist.x, right_wrist.y]
-        elbow = [right_elbow.x, right_elbow.y]
-        shoulder = [right_shoulder.x, right_shoulder.y]
-        
-        right_angle = calculate_angle(wrist, elbow, shoulder)
+        left_angle = calculate_joint_angles(
+            [landmarks.landmark[mp_pose.PoseLandmark.LEFT_WRIST].x, landmarks.landmark[mp_pose.PoseLandmark.LEFT_WRIST].y],
+            [landmarks.landmark[mp_pose.PoseLandmark.LEFT_ELBOW].x, landmarks.landmark[mp_pose.PoseLandmark.LEFT_ELBOW].y],
+            [landmarks.landmark[mp_pose.PoseLandmark.LEFT_SHOULDER].x, landmarks.landmark[mp_pose.PoseLandmark.LEFT_SHOULDER].y], 
+            "left"
+        )
+        right_angle = calculate_joint_angles(
+            [landmarks.landmark[mp_pose.PoseLandmark.RIGHT_WRIST].x, landmarks.landmark[mp_pose.PoseLandmark.RIGHT_WRIST].y],
+            [landmarks.landmark[mp_pose.PoseLandmark.RIGHT_ELBOW].x, landmarks.landmark[mp_pose.PoseLandmark.RIGHT_ELBOW].y],
+            [landmarks.landmark[mp_pose.PoseLandmark.RIGHT_SHOULDER].x, landmarks.landmark[mp_pose.PoseLandmark.RIGHT_SHOULDER].y], 
+            "right"
+        )
 
         if left_angle > 150 and right_angle > 150:
             top_angle = max(top_angle, left_angle, right_angle)
             stage = "up"
-            
+        
         elif left_angle < 80 and right_angle < 80 and stage == 'up':
             rep_count[workout_type] += 1
             stage = "down"
             calories_burned[workout_type] += CALORIES_PER_REP[workout_type] * (body_weight / 70)
-            # print(f"Rep: {rep_count[workout_type]}, Left Angle (down): {left_angle}, Right Angle (down): {right_angle}, Angle(up): {top_angle}")
-            
-            reps_data += f"Rep: {rep_count[workout_type]}, Left Angle (down): {left_angle}, Right Angle (down): {right_angle}, Angle (up): {top_angle}\n"
-            
+            print(f"Push-up Rep: {rep_count[workout_type]}, Left Angle (down): {left_angle}, Right Angle (down): {right_angle}, Angle (up): {top_angle}")
+            reps_data += f"Push-up Rep: {rep_count[workout_type]}, Left Angle (down): {left_angle}, Right Angle (down): {right_angle}, Angle (up): {top_angle}\n"
             top_angle = 0
 
     elif workout_type == 'Squats':
-        left_knee = landmarks.landmark[mp_pose.PoseLandmark.LEFT_KNEE]
-        left_hip = landmarks.landmark[mp_pose.PoseLandmark.LEFT_HIP]
-        left_ankle = landmarks.landmark[mp_pose.PoseLandmark.LEFT_ANKLE]
-
-        knee = [left_knee.x, left_knee.y]
-        hip = [left_hip.x, left_hip.y]
-        ankle = [left_ankle.x, left_ankle.y]
-
-        left_angle = calculate_angle(hip, knee, ankle)
-
-        right_knee = landmarks.landmark[mp_pose.PoseLandmark.RIGHT_KNEE]
-        right_hip = landmarks.landmark[mp_pose.PoseLandmark.RIGHT_HIP]
-        right_ankle = landmarks.landmark[mp_pose.PoseLandmark.RIGHT_ANKLE]
-
-        knee = [right_knee.x, right_knee.y]
-        hip = [right_hip.x, right_hip.y]
-        ankle = [right_ankle.x, right_ankle.y]
-
-        right_angle = calculate_angle(hip, knee, ankle)
+        left_angle = calculate_joint_angles(
+            [landmarks.landmark[mp_pose.PoseLandmark.LEFT_HIP].x, landmarks.landmark[mp_pose.PoseLandmark.LEFT_HIP].y],
+            [landmarks.landmark[mp_pose.PoseLandmark.LEFT_KNEE].x, landmarks.landmark[mp_pose.PoseLandmark.LEFT_KNEE].y],
+            [landmarks.landmark[mp_pose.PoseLandmark.LEFT_ANKLE].x, landmarks.landmark[mp_pose.PoseLandmark.LEFT_ANKLE].y],
+            "left_leg"
+        )
+        right_angle = calculate_joint_angles(
+            [landmarks.landmark[mp_pose.PoseLandmark.RIGHT_HIP].x, landmarks.landmark[mp_pose.PoseLandmark.RIGHT_HIP].y],
+            [landmarks.landmark[mp_pose.PoseLandmark.RIGHT_KNEE].x, landmarks.landmark[mp_pose.PoseLandmark.RIGHT_KNEE].y],
+            [landmarks.landmark[mp_pose.PoseLandmark.RIGHT_ANKLE].x, landmarks.landmark[mp_pose.PoseLandmark.RIGHT_ANKLE].y],
+            "right_leg"
+        )
 
         if left_angle < 90 and right_angle < 90:
             down_angle = min(down_angle, left_angle, right_angle)
             stage = "down"
+        
         elif left_angle > 160 and right_angle > 160 and stage == 'down':
             rep_count[workout_type] += 1
             stage = "up"
             calories_burned[workout_type] += CALORIES_PER_REP[workout_type] * (body_weight / 70)
-            print(f"Rep: {rep_count[workout_type]}, Left Angle (up): {left_angle}, Right Angle (up): {right_angle}, Angle(down): {down_angle}")
-            
-            reps_data += f"Rep: {rep_count[workout_type]}, Left Angle (up): {left_angle}, Right Angle (up): {right_angle}, Angle (down): {down_angle}\n"
-            
+            print(f"Squat Rep: {rep_count[workout_type]}, Left Angle (up): {left_angle}, Right Angle (up): {right_angle}, Angle (down): {down_angle}")
+            reps_data += f"Squat Rep: {rep_count[workout_type]}, Left Angle (up): {left_angle}, Right Angle (up): {right_angle}, Angle (down): {down_angle}\n"
             down_angle = 0
 
     elif workout_type == 'Pull-ups':
+    # Extract the coordinates for the key landmarks (wrist, elbow, and shoulder) for both arms
         left_wrist = landmarks.landmark[mp_pose.PoseLandmark.LEFT_WRIST]
         left_elbow = landmarks.landmark[mp_pose.PoseLandmark.LEFT_ELBOW]
         left_shoulder = landmarks.landmark[mp_pose.PoseLandmark.LEFT_SHOULDER]
-
-        wrist = [left_wrist.x, left_wrist.y]
-        elbow = [left_elbow.x, left_elbow.y]
-        shoulder = [left_shoulder.x, left_shoulder.y]
-
-        left_angle = calculate_angle(wrist, elbow, shoulder)
 
         right_wrist = landmarks.landmark[mp_pose.PoseLandmark.RIGHT_WRIST]
         right_elbow = landmarks.landmark[mp_pose.PoseLandmark.RIGHT_ELBOW]
         right_shoulder = landmarks.landmark[mp_pose.PoseLandmark.RIGHT_SHOULDER]
 
-        wrist = [right_wrist.x, right_wrist.y]
-        elbow = [right_elbow.x, right_elbow.y]
-        shoulder = [right_shoulder.x, right_shoulder.y]
+        # Calculate the angles for both left and right arms
+        left_wrist_coord = [left_wrist.x, left_wrist.y]
+        left_elbow_coord = [left_elbow.x, left_elbow.y]
+        left_shoulder_coord = [left_shoulder.x, left_shoulder.y]
+        left_angle = calculate_angle(left_shoulder_coord, left_elbow_coord, left_wrist_coord)
 
-        right_angle = calculate_angle(wrist, elbow, shoulder)
+        right_wrist_coord = [right_wrist.x, right_wrist.y]
+        right_elbow_coord = [right_elbow.x, right_elbow.y]
+        right_shoulder_coord = [right_shoulder.x, right_shoulder.y]
+        right_angle = calculate_angle(right_shoulder_coord, right_elbow_coord, right_wrist_coord)
 
-        if left_angle > 160 and right_angle > 160:
-            down_angle = max(down_angle, left_angle, right_angle)
+        # Calculate the average angle for both arms
+        average_angle = (left_angle + right_angle) / 2
+        #print(average_angle)
+        # Define the "down" position (full flexion) as an angle greater than 160 degrees
+        if average_angle > 160:
+            down_angle = max(down_angle, average_angle)
             stage = "down"
-        elif left_angle < 70 and right_angle < 70 and stage == 'down':
-            rep_count[workout_type] += 1
-            stage = "up"
-            calories_burned[workout_type] += CALORIES_PER_REP[workout_type] * (body_weight / 70)
 
-            print(f"Rep: {rep_count[workout_type]}, Left Angle (down): {down_angle}, Right Angle (down): {down_angle}, Angle(up): {left_angle}")
-            
-            reps_data += f"Rep: {rep_count[workout_type]}, Left Angle (down): {down_angle}, Right Angle (down): {down_angle}, Angle (up): {left_angle}\n"
-            
-            down_angle = 0
+    # Define the "up" position (fully extended arms) as an angle less than 70 degrees
+        elif average_angle < 70 and stage == 'down':
+            # We also need to check if the wrist height is below the shoulder (indicating the pull-up movement)
+            if left_wrist.y < left_shoulder.y and right_wrist.y < right_shoulder.y:
+                rep_count[workout_type] += 1
+                stage = "up"
+                calories_burned[workout_type] += CALORIES_PER_REP[workout_type] * (body_weight / 70)
+
+                # Log the rep data
+                #print(f"Pull-up Rep: {rep_count[workout_type]}, Left Angle (down): {down_angle}, Right Angle (down): {down_angle}, Angle (up): {average_angle}")
+                reps_data += f"Pull-up Rep: {rep_count[workout_type]}, Left Angle (down): {down_angle}, Right Angle (down): {down_angle}, Angle (up): {average_angle}\n"
+                
+                # Reset down_angle after counting the rep
+                down_angle = 0
 
     elif workout_type == 'Deadlifts':
-        # Left side landmarks
-        left_hip = [landmarks.landmark[mp_pose.PoseLandmark.LEFT_HIP.value].x,
-                    landmarks.landmark[mp_pose.PoseLandmark.LEFT_HIP.value].y]
-        left_knee = [landmarks.landmark[mp_pose.PoseLandmark.LEFT_KNEE.value].x,
-                    landmarks.landmark[mp_pose.PoseLandmark.LEFT_KNEE.value].y]
-        left_ankle = [landmarks.landmark[mp_pose.PoseLandmark.LEFT_ANKLE.value].x,
-                    landmarks.landmark[mp_pose.PoseLandmark.LEFT_ANKLE.value].y]
-        left_angle = calculate_angle(left_hip, left_knee, left_ankle)
+        left_angle = calculate_joint_angles(
+            [landmarks.landmark[mp_pose.PoseLandmark.LEFT_HIP].x, landmarks.landmark[mp_pose.PoseLandmark.LEFT_HIP].y],
+            [landmarks.landmark[mp_pose.PoseLandmark.LEFT_KNEE].x, landmarks.landmark[mp_pose.PoseLandmark.LEFT_KNEE].y],
+            [landmarks.landmark[mp_pose.PoseLandmark.LEFT_ANKLE].x, landmarks.landmark[mp_pose.PoseLandmark.LEFT_ANKLE].y],
+            "left_leg"
+        )
+        right_angle = calculate_joint_angles(
+            [landmarks.landmark[mp_pose.PoseLandmark.RIGHT_HIP].x, landmarks.landmark[mp_pose.PoseLandmark.RIGHT_HIP].y],
+            [landmarks.landmark[mp_pose.PoseLandmark.RIGHT_KNEE].x, landmarks.landmark[mp_pose.PoseLandmark.RIGHT_KNEE].y],
+            [landmarks.landmark[mp_pose.PoseLandmark.RIGHT_ANKLE].x, landmarks.landmark[mp_pose.PoseLandmark.RIGHT_ANKLE].y],
+            "right_leg"
+        )
 
-        # Right side landmarks
-        right_hip = [landmarks.landmark[mp_pose.PoseLandmark.RIGHT_HIP.value].x,
-                    landmarks.landmark[mp_pose.PoseLandmark.RIGHT_HIP.value].y]
-        right_knee = [landmarks.landmark[mp_pose.PoseLandmark.RIGHT_KNEE.value].x,
-                    landmarks.landmark[mp_pose.PoseLandmark.RIGHT_KNEE.value].y]
-        right_ankle = [landmarks.landmark[mp_pose.PoseLandmark.RIGHT_ANKLE.value].x,
-                    landmarks.landmark[mp_pose.PoseLandmark.RIGHT_ANKLE.value].y]
-        right_angle = calculate_angle(right_hip, right_knee, right_ankle)
-
-        # Use the minimum angle for consistency
         angle = min(left_angle, right_angle)
 
-        # Check stages and count repetitions
         if angle > 170:
             down_angle = max(down_angle, angle)
             stage = "down"
+        
         elif angle < 145 and stage == 'down':
             rep_count[workout_type] += 1
             stage = "up"
             calories_burned[workout_type] += CALORIES_PER_REP[workout_type] * (body_weight / 70) * (1 + (dumbbellWeight / 10))
-
-            print(f"Rep: {rep_count[workout_type]}, Angle (down): {down_angle}, Angle (up): {angle}")
-
-            reps_data += f"Rep: {rep_count[workout_type]}, Angle (down): {down_angle}, Angle (up): {angle}\n"
-
+            #print(f"Deadlift Rep: {rep_count[workout_type]}, Angle (down): {down_angle}, Angle (up): {angle}")
+            reps_data += f"Deadlift Rep: {rep_count[workout_type]}, Angle (down): {down_angle},Angle (up): {angle}\n"
             down_angle = 0
-
 
     elif workout_type == 'Bicep Curls':
         left_wrist = landmarks.landmark[mp_pose.PoseLandmark.LEFT_WRIST]
@@ -545,13 +539,13 @@ def count_reps(landmarks, workout_type, body_weight,dumbbellWeight):
             stage = "up"
             calories_burned[workout_type] += CALORIES_PER_REP[workout_type] * (body_weight / 70) * (1 + (dumbbellWeight / 10))
 
-            print(f"Rep: {rep_count[workout_type]}, Angle (down): {down_angle}, Angle(up): {angle}")
+
+            #print(f"Rep: {rep_count[workout_type]}, Angle (down): {down_angle}, Angle(up): {angle}")
 
             reps_data += f"Rep: {rep_count[workout_type]}, Angle (down): {down_angle}, Angle (up): {angle}\n"
 
-            down_angle = 0
-
-
+            down_angle = 0    # Bicep Curl joint angle calculation
+        
 
 # MongoDB setup
 MONGO_URI = "mongodb+srv://naninani38502886:mT67vL5t7b2CbPQY@cluster0.yokp6.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0" 
